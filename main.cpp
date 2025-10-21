@@ -1,45 +1,19 @@
 #include <iostream>
 #include <raylib.h>
-
-using namespace std;
+#include "gui.h"
 
 int main () {
+    // Window size; raylib helpers need a window before many calls, so pick a safe default.
+    const int SCREEN_WIDTH = 1280;
+    const int SCREEN_HEIGHT = 720;
 
-    // Use the primary monitor's current resolution for fullscreen
-    const int SCREEN_WIDTH = GetMonitorWidth(0);
-    const int SCREEN_HEIGHT = GetMonitorHeight(0);
-    int ball_x = 100;
-    int ball_y = 100;
-    int ball_speed_x = 5;
-    int ball_speed_y = 5;
-    int ball_radius = 15;
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Techcore - PC Components Store");
+    // Optionally start fullscreen on primary monitor. Commented so it's easier to test.
+    // ToggleFullscreen();
 
-    cout << "Hello World" << endl;
-
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "My first RAYLIB program!");
-    ToggleFullscreen(); // switch the window to fullscreen mode
-    SetTargetFPS(60);
-
-    while (WindowShouldClose() == false){
-   
-        ball_x += ball_speed_x;
-        ball_y += ball_speed_y;
-
-        if(ball_x + ball_radius >= SCREEN_WIDTH || ball_x - ball_radius <= 0)
-        {
-            ball_speed_x *= -1;
-        }
-
-        if(ball_y + ball_radius >= SCREEN_HEIGHT || ball_y - ball_radius <= 0)
-        {
-            ball_speed_y *= -1;
-        }
-        
-        BeginDrawing();
-            ClearBackground(BLACK);
-            DrawCircle(ball_x,ball_y,ball_radius, WHITE);
-        EndDrawing();
-    }
+    // Run the Techcore UI (blocks until window should close)
+    techcore::RunTechcoreUI(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     CloseWindow();
+    return 0;
 }
