@@ -5,8 +5,9 @@ using namespace std;
 
 int main () {
 
-    const int SCREEN_WIDTH = 800;
-    const int SCREEN_HEIGHT = 600;
+    // Use the primary monitor's current resolution for fullscreen
+    const int SCREEN_WIDTH = GetMonitorWidth(0);
+    const int SCREEN_HEIGHT = GetMonitorHeight(0);
     int ball_x = 100;
     int ball_y = 100;
     int ball_speed_x = 5;
@@ -16,6 +17,7 @@ int main () {
     cout << "Hello World" << endl;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "My first RAYLIB program!");
+    ToggleFullscreen(); // switch the window to fullscreen mode
     SetTargetFPS(60);
 
     while (WindowShouldClose() == false){
