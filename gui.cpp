@@ -59,6 +59,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     std::vector<std::string> categories = {"All","CPU","GPU","RAM","Storage"};
     std::string selectedCategory = "All";
     std::string search;
+    bool isSearchActive = false;
     int cols = 2;
     float gutter = 18.f;
     float cardW = (screenWidth - 80 - (cols-1)*gutter)/cols;
@@ -83,16 +84,64 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         }
 
         // SEARCH BAR
-        DrawRectangle(40,120,320,32,METAL_PANEL);
-        DrawText("Pesquisar:",48,126,16,METAL_BRONZE);
-        DrawText(search.c_str(),160,126,16,METAL_HIGHLIGHT);
-
-        if(CheckCollisionPointRec(GetMousePosition(), Rectangle{40,120,320,32}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        // Search bar background and interaction
+        Rectangle searchBar = {40, 120, 320, 32};
+        Rectangle textArea = {160, 120, 190, 32}; // Area for search text
+        DrawRectangleRec(searchBar, METAL_PANEL);
+        DrawRectangleLinesEx(searchBar, 1, METAL_ACCENT);
+        
+        // Search text or placeholder
+        if (search.empty() && !isSearchActive) {
+            DrawText("Pesquisar produto...", 48, 126, 16, METAL_BRONZE);
+        } else {
+            DrawText("Pesquisar:", 48, 126, 16, METAL_BRONZE);
+            
+            // Measure text width to prevent overflow
+            const float maxWidth = textArea.width - 10;
+            const char* text = search.c_str();
+            float textWidth = MeasureText(text, 16);
+            
+            // Draw text with clipping
+            BeginScissorMode((int)textArea.x, (int)textArea.y, (int)textArea.width, (int)textArea.height);
+            DrawText(text, (int)textArea.x, 126, 16, METAL_HIGHLIGHT);
+            
+            // Draw blinking cursor if search is active
+            if (isSearchActive && ((GetTime() * 2) - (int)(GetTime() * 2) < 0.5f)) {
+                DrawRectangle((int)textArea.x + (int)textWidth + 2, 126, 2, 16, METAL_HIGHLIGHT);
+            }
+            EndScissorMode();
+        }
+        
+        // Check for click on search bar
+        if (CheckCollisionPointRec(GetMousePosition(), searchBar) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            isSearchActive = true;
+        } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !CheckCollisionPointRec(GetMousePosition(), searchBar)) {
+            isSearchActive = false;
+        }
+        
+        // Handle text input when search is active
+        if (isSearchActive) {
+            // Handle backspace
+            if (IsKeyPressed(KEY_BACKSPACE) && !search.empty()) {
+                search.pop_back();
+            }
+            
+            // Handle regular text input
             int key = GetCharPressed();
-            while(key>0){
-                if(key==KEY_BACKSPACE){ if(!search.empty()) search.pop_back(); }
-                else if(key>=32 && key<=126) search.push_back((char)key);
+            while (key > 0) {
+                if (key >= 32 && key <= 126) { // Printable characters
+                    // Check if adding the character would make the text too wide
+                    std::string testStr = search + (char)key;
+                    if (MeasureText(testStr.c_str(), 16) < 180) { // Leave some padding
+                        search += (char)key;
+                    }
+                }
                 key = GetCharPressed();
+            }
+            
+            // Handle escape to deactivate search
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                isSearchActive = false;
             }
         }
 
@@ -154,7 +203,7 @@ bool RunLoginUI(int screenWidth, int screenHeight) {
     while (!finished && !WindowShouldClose()) {
         BeginDrawing();
         DrawRectangle(0,0,screenWidth,screenHeight, Fade(BLACK,0.72f));
-        Rectangle modal{screenWidth/2-170,screenHeight/2-100,340,200};
+        Rectangle modal{(float)(screenWidth/2-170), (float)(screenHeight/2-100), 340, 200};
         DrawRectangleRec(modal, METAL_PANEL);
         DrawText(mode==LOGIN?"Login":"Registar",modal.x+24,modal.y+14,20,METAL_HIGHLIGHT);
 
