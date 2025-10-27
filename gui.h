@@ -19,7 +19,7 @@ struct CartItem {
 };
 
 void RunTechcoreUI(int screenWidth, int screenHeight, bool (*loginFunc)(int, int));
+
 }
 
-// Button utility for use everywhere
 bool DrawButton(const char* label, Rectangle r, Color bg);
