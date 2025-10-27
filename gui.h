@@ -1,7 +1,7 @@
 #pragma once
+#include <raylib.h>
 #include <vector>
 #include <string>
-#include <raylib.h>
 
 namespace techcore {
 
@@ -10,7 +10,7 @@ struct Product {
     std::string name;
     std::string desc;
     float price;
-    Color color; // placeholder thumbnail color
+    Color color;
 };
 
 struct CartItem {
@@ -18,12 +18,8 @@ struct CartItem {
     int qty;
 };
 
-enum class CartMenuState {
-    Hidden,
-    Showing
-};
+void RunTechcoreUI(int screenWidth, int screenHeight, bool (*loginFunc)(int, int));
+}
 
-// Starts the Techcore UI loop. Assumes a window was already created.
-void RunTechcoreUI(int screenWidth = 1280, int screenHeight = 720);
-
-} // namespace techcore
+// Button utility for use everywhere
+bool DrawButton(const char* label, Rectangle r, Color bg);
