@@ -37,17 +37,74 @@ std::vector<Product> defaultProducts() {
         {8, "GPU: RTX 3070", "Placa gráfica 8GB GDDR6.", 499.99f, DARKBLUE},
         {9, "GPU: RTX 3080", "Placa gráfica 10GB GDDR6X.", 699.99f, DARKBLUE},
         {13, "RAM: 16GB DDR4 3200", "Kit memória 16GB (2x8GB) 3200MHz.", 79.99f, LIME},
-        // ... extend for full catalog
     };
 }
 
-void DrawHeader(int screenW) {
+void DrawHeader(int screenW, int cartCount, bool highlightCartBtn) {
     DrawRectangle(0, 0, screenW, 72, METAL_BG);
     Rectangle logoBox{12.0f, 12.0f, 56.0f, 48.0f};
     DrawRectangleRec(logoBox, METAL_PANEL);
     DrawRectangleLinesEx(logoBox, 2, METAL_ACCENT);
     DrawText("Techcore", 80, 24, 28, METAL_HIGHLIGHT);
     DrawText("Componentes", 80, 54, 15, METAL_BRONZE);
+
+    // Botão de carrinho no topo direito
+    float btnW = 120, btnH = 40;
+    float btnX = screenW - btnW - 32, btnY = 16;
+    Rectangle cartBtn = {btnX, btnY, btnW, btnH};
+    DrawRectangleRec(cartBtn, highlightCartBtn ? BUTTON_BLUE : METAL_PANEL);
+    DrawRectangleLinesEx(cartBtn, 2, METAL_ACCENT);
+    std::string text = "Carrinho";
+    if(cartCount > 0) text += " (" + std::to_string(cartCount) + ")";
+    int txW = MeasureText(text.c_str(),18);
+    DrawText(text.c_str(), (int)(btnX+btnW/2-txW/2), (int)(btnY+btnH/2-9), 18, TEXT_WHITE);
+}
+
+void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& cart, bool& showModal, std::string& cartMessage) {
+    // Modal semitransparente
+    DrawRectangle(0,0,screenWidth,screenHeight, Fade(BLACK,0.72f));
+    int mw = 480, mh = 380;
+    Rectangle modal{(float)(screenWidth/2-mw/2), (float)(screenHeight/2-mh/2), (float)mw, (float)mh};
+    DrawRectangleRec(modal, METAL_PANEL);
+    DrawRectangleLinesEx(modal, 2, METAL_ACCENT);
+
+    DrawText("Carrinho de Compras", modal.x+20, modal.y+12, 24, METAL_HIGHLIGHT);
+
+    int y = (int)modal.y + 50;
+    float total = 0.0f;
+    if(cart.empty()){
+        DrawText("O carrinho está vazio.", modal.x+20, y, 18, METAL_BRONZE);
+    } else {
+        for(size_t i=0; i<cart.size(); ++i){
+            const CartItem& item = cart[i];
+            char line[256];
+            snprintf(line, sizeof(line), "%dx %s  -  €%.2f", item.qty, item.product.name.c_str(), item.product.price * item.qty);
+            DrawText(line, modal.x+24, y, 18, METAL_HIGHLIGHT);
+            y += 28;
+            total += item.product.price * item.qty;
+        }
+    }
+
+    char totalBuf[64];
+    snprintf(totalBuf, sizeof(totalBuf), "Total: € %.2f", total);
+    DrawText(totalBuf, modal.x+24, modal.y+mh-90, 20, METAL_BRONZE);
+
+    Rectangle btnFinalizar{modal.x+30, modal.y+mh-48, 160, 32};
+    Rectangle btnContinuar{modal.x+modal.width-190, modal.y+mh-48, 160, 32};
+
+    if(DrawButton("Finalizar compra", btnFinalizar, BUTTON_BLUE)) {
+        cartMessage = "Compra registada! (Simulação)";
+        showModal = false; // Fecha o modal; podes aqui abrir outro ou limpar carrinho, etc.
+        cart.clear();
+    }
+    if(DrawButton("Continuar a comprar", btnContinuar, METAL_ACCENT)) {
+        showModal = false;
+    }
+
+    // Mensagem feedback rápida, se existir
+    if(!cartMessage.empty()){
+        DrawText(cartMessage.c_str(), modal.x+24, modal.y+mh-110, 18, BUTTON_RED);
+    }
 }
 
 void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int)) {
@@ -60,6 +117,8 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     std::string selectedCategory = "All";
     std::string search;
     bool isSearchActive = false;
+    bool showCart = false;
+    std::string cartMessage;
     int cols = 2;
     float gutter = 18.f;
     float cardW = (screenWidth - 80 - (cols-1)*gutter)/cols;
@@ -69,7 +128,65 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         BeginDrawing();
         ClearBackground(METAL_BG);
 
-        DrawHeader(screenWidth);
+        // Detecta se o cursor está sobre o botão do carrinho
+        float btnW = 120, btnH = 40;
+        float btnX = screenWidth - btnW - 32, btnY = 16;
+        Rectangle cartBtn = {btnX, btnY, btnW, btnH};
+        Vector2 mp = GetMousePosition();
+        bool highlightCart = CheckCollisionPointRec(mp, cartBtn);
+
+        DrawHeader(screenWidth, (int)cart.size(), highlightCart);
+
+        // Abre modal do carrinho, se clicar no botão carrinho
+        if(CheckCollisionPointRec(mp, cartBtn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+            showCart = true;
+            cartMessage = "";
+        }
+
+        // Barra de pesquisa, igual à última versão enviada a ti
+        Rectangle searchBar = {40, 120, 320, 32};
+        DrawRectangleRec(searchBar, METAL_PANEL);
+        DrawRectangleLinesEx(searchBar, 1, METAL_ACCENT);
+        const char* searchLabel = "Pesquisar";
+        int labelWidth = MeasureText(searchLabel, 16);
+        float labelX = 48;
+        float textStartX = labelX + labelWidth + 6; // 6px após label
+        Rectangle textArea = {textStartX, 120, searchBar.width - (textStartX - searchBar.x) - 10, 32};
+
+        if (!isSearchActive && search.empty()) {
+            DrawText(searchLabel, labelX, 126, 16, METAL_BRONZE);
+        }
+        if (CheckCollisionPointRec(GetMousePosition(), searchBar) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            isSearchActive = true;
+        } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !CheckCollisionPointRec(GetMousePosition(), searchBar)) {
+            isSearchActive = false;
+        }
+        if (isSearchActive) {
+            DrawText(searchLabel, labelX, 126, 16, METAL_BRONZE);
+            float textWidth = MeasureText(search.c_str(), 16);
+            BeginScissorMode((int)textArea.x, (int)textArea.y, (int)textArea.width, (int)textArea.height);
+            DrawText(search.c_str(), (int)textStartX, 126, 16, METAL_HIGHLIGHT);
+            if (((GetTime() * 2) - (int)(GetTime() * 2) < 0.5f)) {
+                DrawRectangle((int)textStartX + (int)textWidth + 2, 126, 2, 16, METAL_HIGHLIGHT);
+            }
+            EndScissorMode();
+        }
+        if (isSearchActive) {
+            if (IsKeyPressed(KEY_BACKSPACE) && !search.empty()) {
+                search.pop_back();
+            }
+            int key = GetCharPressed();
+            while (key > 0) {
+                if (key >= 32 && key <= 126) {
+                    std::string testStr = search + (char)key;
+                    if (MeasureText(testStr.c_str(), 16) < (textArea.width - 10)) {
+                        search += (char)key;
+                    }
+                }
+                key = GetCharPressed();
+            }
+            if (IsKeyPressed(KEY_ESCAPE)) isSearchActive = false;
+        }
 
         // CATEGORY FILTER UI (chips/buttons)
         float chipX = 32, chipY = 80;
@@ -83,69 +200,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             chipX += 100;
         }
 
-        // SEARCH BAR
-        // Search bar background and interaction
-        Rectangle searchBar = {40, 120, 320, 32};
-        Rectangle textArea = {160, 120, 190, 32}; // Area for search text
-        DrawRectangleRec(searchBar, METAL_PANEL);
-        DrawRectangleLinesEx(searchBar, 1, METAL_ACCENT);
-        
-        // Search text or placeholder
-        if (search.empty() && !isSearchActive) {
-            DrawText("Pesquisar produto...", 48, 126, 16, METAL_BRONZE);
-        } else {
-            DrawText("Pesquisar:", 48, 126, 16, METAL_BRONZE);
-            
-            // Measure text width to prevent overflow
-            const float maxWidth = textArea.width - 10;
-            const char* text = search.c_str();
-            float textWidth = MeasureText(text, 16);
-            
-            // Draw text with clipping
-            BeginScissorMode((int)textArea.x, (int)textArea.y, (int)textArea.width, (int)textArea.height);
-            DrawText(text, (int)textArea.x, 126, 16, METAL_HIGHLIGHT);
-            
-            // Draw blinking cursor if search is active
-            if (isSearchActive && ((GetTime() * 2) - (int)(GetTime() * 2) < 0.5f)) {
-                DrawRectangle((int)textArea.x + (int)textWidth + 2, 126, 2, 16, METAL_HIGHLIGHT);
-            }
-            EndScissorMode();
-        }
-        
-        // Check for click on search bar
-        if (CheckCollisionPointRec(GetMousePosition(), searchBar) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            isSearchActive = true;
-        } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !CheckCollisionPointRec(GetMousePosition(), searchBar)) {
-            isSearchActive = false;
-        }
-        
-        // Handle text input when search is active
-        if (isSearchActive) {
-            // Handle backspace
-            if (IsKeyPressed(KEY_BACKSPACE) && !search.empty()) {
-                search.pop_back();
-            }
-            
-            // Handle regular text input
-            int key = GetCharPressed();
-            while (key > 0) {
-                if (key >= 32 && key <= 126) { // Printable characters
-                    // Check if adding the character would make the text too wide
-                    std::string testStr = search + (char)key;
-                    if (MeasureText(testStr.c_str(), 16) < 180) { // Leave some padding
-                        search += (char)key;
-                    }
-                }
-                key = GetCharPressed();
-            }
-            
-            // Handle escape to deactivate search
-            if (IsKeyPressed(KEY_ESCAPE)) {
-                isSearchActive = false;
-            }
-        }
-
-        // FILTERED PRODUCTS
+        // Produtos filtrados por categoria e pesquisa
         std::vector<int> visible;
         for(size_t i=0;i<products.size();++i){
             bool shown=true;
@@ -187,14 +242,17 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             showLoginPrompt=false;
         }
 
-        DrawText(TextFormat("Carrinho: %d", (int)cart.size()), 40, screenHeight-44, 18, GOLD);
+        // MODAL DO CARRINHO
+        if(showCart){
+            ShowCartModal(screenWidth, screenHeight, cart, showCart, cartMessage);
+        }
 
         EndDrawing();
     }
 }
 }
 
-// --- Login Modal (outside namespace) ---
+// --- Login Modal (igual ao teu) ---
 bool RunLoginUI(int screenWidth, int screenHeight) {
     enum Mode { LOGIN, REGISTER }; Mode mode = LOGIN;
     std::string username, password, message;
