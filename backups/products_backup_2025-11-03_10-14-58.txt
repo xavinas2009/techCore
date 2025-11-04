@@ -1,0 +1,120 @@
+1|AMD Ryzen 5 5600X|6-Core/12-Thread, 3.7GHz Base, 4.6GHz Boost|199.99|255,161,0|CPU
+2|AMD Ryzen 7 5800X|8-Core/16-Thread, 3.8GHz Base, 4.7GHz Boost|349.99|255,161,0|CPU
+3|AMD Ryzen 9 5950X|16-Core/32-Thread, 3.4GHz Base, 4.9GHz Boost|549.99|255,161,0|CPU
+4|AMD Ryzen 5 7600X|6-Core/12-Thread, 4.7GHz Base, 5.3GHz Boost|249.99|255,161,0|CPU
+5|AMD Ryzen 7 7700X|8-Core/16-Thread, 4.5GHz Base, 5.4GHz Boost|379.99|255,161,0|CPU
+6|AMD Ryzen 9 7950X|16-Core/32-Thread, 4.5GHz Base, 5.7GHz Boost|699.99|255,161,0|CPU
+7|Intel Core i5-12600K|10-Core (6P+4E), Up to 4.9GHz|279.99|0,121,241|CPU
+8|Intel Core i7-12700K|12-Core (8P+4E), Up to 5.0GHz|389.99|0,121,241|CPU
+9|Intel Core i9-12900K|16-Core (8P+8E), Up to 5.2GHz|589.99|0,121,241|CPU
+10|Intel Core i5-13600K|14-Core (6P+8E), Up to 5.1GHz|319.99|0,121,241|CPU
+11|Intel Core i7-13700K|16-Core (8P+8E), Up to 5.4GHz|419.99|0,121,241|CPU
+12|Intel Core i9-13900K|24-Core (8P+16E), Up to 5.8GHz|589.99|0,121,241|CPU
+13|AMD Ryzen 5 5600G|6-Core/12-Thread with Radeon Graphics|159.99|255,161,0|CPU
+14|Intel Core i3-12100F|4-Core/8-Thread, Up to 4.3GHz|109.99|0,121,241|CPU
+15|AMD Ryzen 7 5700X|8-Core/16-Thread, 3.4GHz Base, 4.6GHz Boost|229.99|255,161,0|CPU
+16|NVIDIA RTX 3060|12GB GDDR6, 3584 CUDA Cores|329.99|0,228,48|GPU
+17|NVIDIA RTX 3070|8GB GDDR6, 5888 CUDA Cores|499.99|0,228,48|GPU
+18|NVIDIA RTX 3080|10GB GDDR6X, 8704 CUDA Cores|699.99|0,228,48|GPU
+19|NVIDIA RTX 3090|24GB GDDR6X, 10496 CUDA Cores|1499.99|0,228,48|GPU
+20|NVIDIA RTX 4060 Ti|8GB GDDR6, 4352 CUDA Cores|399.99|0,228,48|GPU
+21|NVIDIA RTX 4070|12GB GDDR6X, 5888 CUDA Cores|599.99|0,228,48|GPU
+22|NVIDIA RTX 4080|16GB GDDR6X, 9728 CUDA Cores|1199.99|0,228,48|GPU
+23|NVIDIA RTX 4090|24GB GDDR6X, 16384 CUDA Cores|1599.99|0,228,48|GPU
+24|AMD RX 6600|8GB GDDR6, 1792 Stream Processors|269.99|220,38,38|GPU
+25|AMD RX 6700 XT|12GB GDDR6, 2560 Stream Processors|449.99|220,38,38|GPU
+26|AMD RX 6800|16GB GDDR6, 3840 Stream Processors|579.99|220,38,38|GPU
+27|AMD RX 6900 XT|16GB GDDR6, 5120 Stream Processors|999.99|220,38,38|GPU
+28|AMD RX 7600|8GB GDDR6, 2048 Stream Processors|269.99|220,38,38|GPU
+29|AMD RX 7700 XT|12GB GDDR6, 3456 Stream Processors|449.99|220,38,38|GPU
+30|AMD RX 7900 XTX|24GB GDDR6, 6144 Stream Processors|999.99|220,38,38|GPU
+31|NVIDIA GTX 1660 Super|6GB GDDR6, 1408 CUDA Cores|229.99|0,228,48|GPU
+32|AMD RX 6650 XT|8GB GDDR6, 2048 Stream Processors|299.99|220,38,38|GPU
+33|NVIDIA RTX 3060 Ti|8GB GDDR6, 4864 CUDA Cores|429.99|0,228,48|GPU
+34|Corsair Vengeance 16GB DDR4|2x8GB 3200MHz CL16|79.99|0,158,47|RAM
+35|Corsair Vengeance 32GB DDR4|2x16GB 3600MHz CL18|129.99|0,158,47|RAM
+36|G.Skill Trident Z5 32GB DDR5|2x16GB 6000MHz CL36|179.99|0,158,47|RAM
+37|G.Skill Trident Z5 64GB DDR5|2x32GB 6400MHz CL32|329.99|0,158,47|RAM
+38|Kingston Fury Beast 16GB DDR4|2x8GB 3200MHz CL16|69.99|0,158,47|RAM
+39|Kingston Fury Beast 32GB DDR5|2x16GB 5600MHz CL40|149.99|0,158,47|RAM
+40|Corsair Dominator 32GB DDR5|2x16GB 6200MHz CL32|229.99|0,158,47|RAM
+41|G.Skill Ripjaws V 32GB DDR4|2x16GB 3600MHz CL16|119.99|0,158,47|RAM
+42|Crucial Ballistix 16GB DDR4|2x8GB 3600MHz CL16|74.99|0,158,47|RAM
+43|TeamGroup T-Force 32GB DDR5|2x16GB 6000MHz CL38|159.99|0,158,47|RAM
+44|Samsung 980 Pro 1TB|NVMe Gen4, 7000MB/s Read|149.99|0,82,172|Storage
+45|Samsung 980 Pro 2TB|NVMe Gen4, 7000MB/s Read|279.99|0,82,172|Storage
+46|WD Black SN850X 1TB|NVMe Gen4, 7300MB/s Read|139.99|0,82,172|Storage
+47|WD Black SN850X 2TB|NVMe Gen4, 7300MB/s Read|269.99|0,82,172|Storage
+48|Crucial P5 Plus 1TB|NVMe Gen4, 6600MB/s Read|119.99|0,82,172|Storage
+49|Crucial P5 Plus 2TB|NVMe Gen4, 6600MB/s Read|229.99|0,82,172|Storage
+50|Samsung 870 EVO 500GB|SATA III, 560MB/s Read|59.99|135,206,235|Storage
+51|Samsung 870 EVO 1TB|SATA III, 560MB/s Read|99.99|135,206,235|Storage
+52|Crucial MX500 1TB|SATA III, 560MB/s Read|89.99|135,206,235|Storage
+53|WD Blue 1TB|SATA III, 560MB/s Read|79.99|135,206,235|Storage
+54|Samsung 990 Pro 2TB|NVMe Gen4, 7450MB/s Read|299.99|0,82,172|Storage
+55|Seagate FireCuda 530 2TB|NVMe Gen4, 7300MB/s Read|289.99|0,82,172|Storage
+56|Kingston KC3000 1TB|NVMe Gen4, 7000MB/s Read|129.99|0,82,172|Storage
+57|WD Black SN770 1TB|NVMe Gen4, 5150MB/s Read|99.99|0,82,172|Storage
+58|Crucial P3 Plus 2TB|NVMe Gen4, 5000MB/s Read|159.99|0,82,172|Storage
+59|ASUS ROG Strix B550-F|AM4, ATX, PCIe 4.0|189.99|128,0,0|Motherboard
+60|MSI MAG B550 TOMAHAWK|AM4, ATX, PCIe 4.0|179.99|128,0,0|Motherboard
+61|Gigabyte X570 AORUS Elite|AM4, ATX, PCIe 4.0|229.99|128,0,0|Motherboard
+62|ASUS TUF Gaming B650-PLUS|AM5, ATX, DDR5, PCIe 5.0|219.99|128,0,0|Motherboard
+63|MSI MPG X670E Carbon|AM5, ATX, DDR5, PCIe 5.0|449.99|128,0,0|Motherboard
+64|ASUS Prime Z690-P|LGA1700, ATX, DDR5, PCIe 5.0|249.99|200,16,255|Motherboard
+65|MSI MAG Z690 TOMAHAWK|LGA1700, ATX, DDR5, PCIe 5.0|279.99|200,16,255|Motherboard
+66|Gigabyte Z690 AORUS Elite|LGA1700, ATX, DDR5, PCIe 5.0|299.99|200,16,255|Motherboard
+67|ASUS ROG Strix Z790-E|LGA1700, ATX, DDR5, PCIe 5.0|469.99|200,16,255|Motherboard
+68|ASRock B550M Steel Legend|AM4, Micro-ATX, PCIe 4.0|139.99|128,0,0|Motherboard
+69|MSI PRO B650-P|AM5, ATX, DDR5, PCIe 4.0|189.99|128,0,0|Motherboard
+70|Gigabyte B760M DS3H|LGA1700, Micro-ATX, DDR5|129.99|200,16,255|Motherboard
+71|ASUS Prime B550M-A|AM4, Micro-ATX, PCIe 4.0|119.99|128,0,0|Motherboard
+72|Corsair RM750x|750W 80+ Gold Modular|119.99|255,203,0|PSU
+73|Corsair RM850x|850W 80+ Gold Modular|139.99|255,203,0|PSU
+74|EVGA SuperNOVA 750 G6|750W 80+ Gold Modular|109.99|255,203,0|PSU
+75|EVGA SuperNOVA 850 G6|850W 80+ Gold Modular|129.99|255,203,0|PSU
+76|Seasonic Focus GX-850|850W 80+ Gold Modular|134.99|255,203,0|PSU
+77|be quiet! Straight Power 11|750W 80+ Platinum Modular|149.99|255,203,0|PSU
+78|Corsair HX1000|1000W 80+ Platinum Modular|199.99|255,203,0|PSU
+79|Thermaltake Toughpower GF1|850W 80+ Gold Modular|119.99|255,203,0|PSU
+80|MSI MPG A850GF|850W 80+ Gold Modular|139.99|255,203,0|PSU
+81|NZXT C750|750W 80+ Gold Modular|109.99|255,203,0|PSU
+82|Noctua NH-D15|Dual Tower Air Cooler|99.99|165,42,42|Cooling
+83|be quiet! Dark Rock Pro 4|Dual Tower Air Cooler|89.99|165,42,42|Cooling
+84|Corsair H100i RGB|240mm AIO Liquid Cooler|119.99|165,42,42|Cooling
+85|NZXT Kraken X63|280mm AIO Liquid Cooler|149.99|165,42,42|Cooling
+86|Arctic Liquid Freezer II 360|360mm AIO Liquid Cooler|139.99|165,42,42|Cooling
+87|Cooler Master Hyper 212|Tower Air Cooler|39.99|165,42,42|Cooling
+88|Corsair iCUE H150i Elite|360mm AIO Liquid Cooler|179.99|165,42,42|Cooling
+89|DeepCool AK620|Dual Tower Air Cooler|64.99|165,42,42|Cooling
+90|Thermalright Peerless Assassin|Dual Tower Air Cooler|49.99|165,42,42|Cooling
+91|NZXT Kraken Z73|360mm AIO LCD Display|279.99|165,42,42|Cooling
+92|NZXT H510|Mid Tower, Tempered Glass|89.99|169,169,169|Case
+93|Fractal Design Meshify C|Mid Tower, Mesh Front|99.99|169,169,169|Case
+94|Corsair 4000D Airflow|Mid Tower, High Airflow|104.99|169,169,169|Case
+95|Lian Li O11 Dynamic|Mid Tower, Dual Chamber|139.99|169,169,169|Case
+96|Phanteks Eclipse P400A|Mid Tower, Mesh Front|89.99|169,169,169|Case
+97|be quiet! Pure Base 500DX|Mid Tower, Tempered Glass|109.99|169,169,169|Case
+98|Corsair 5000D Airflow|Mid Tower, High Airflow|149.99|169,169,169|Case
+99|Lian Li Lancool II Mesh|Mid Tower, Mesh Front|119.99|169,169,169|Case
+100|NZXT H710i|Mid Tower, Smart Device|169.99|169,169,169|Case
+101|Fractal Design Torrent|Mid Tower, Max Airflow|179.99|169,169,169|Case
+102|Logitech G Pro Wireless|Wireless Gaming Mouse|129.99|255,192,203|Peripheral
+103|Razer DeathAdder V3|Gaming Mouse, 30K DPI|69.99|255,192,203|Peripheral
+104|Corsair K70 RGB|Mechanical Gaming Keyboard|159.99|255,192,203|Peripheral
+105|SteelSeries Apex Pro|Mechanical Gaming Keyboard|199.99|255,192,203|Peripheral
+106|HyperX Cloud II|Gaming Headset, 7.1 Surround|99.99|255,192,203|Peripheral
+107|SteelSeries Arctis 7|Wireless Gaming Headset|149.99|255,192,203|Peripheral
+108|Logitech G502 Hero|Wired Gaming Mouse, 25K DPI|49.99|255,192,203|Peripheral
+109|Razer BlackWidow V3|Mechanical Gaming Keyboard|139.99|255,192,203|Peripheral
+110|Corsair Dark Core RGB|Wireless Gaming Mouse|89.99|255,192,203|Peripheral
+111|HyperX Alloy FPS Pro|Compact Mechanical Keyboard|79.99|255,192,203|Peripheral
+112|Audio-Technica ATH-M50X|Studio Monitor Headphones|149.99|255,192,203|Peripheral
+113|Blue Yeti|USB Condenser Microphone|129.99|255,192,203|Peripheral
+114|Elgato Stream Deck|15-Key Control Pad|149.99|255,192,203|Peripheral
+115|Logitech C920|HD Pro Webcam|79.99|255,192,203|Peripheral
+116|Samsung Odyssey G7|27in 1440p 240Hz Curved Monitor|599.99|255,192,203|Peripheral
+117|LG 27GL850|27in 1440p 144Hz IPS Monitor|449.99|255,192,203|Peripheral
+118|ASUS ROG Swift PG279Q|27in 1440p 165Hz IPS G-Sync|699.99|255,192,203|Peripheral
+119|Acer Predator X34|34in 3440x1440 120Hz Ultrawide|899.99|255,192,203|Peripheral
+120|BenQ ZOWIE XL2546K|24.5in 1080p 240Hz DyAc+|499.99|255,192,203|Peripheral
