@@ -5,26 +5,49 @@
 
 namespace techcore {
 
-// Estrutura que representa um produto da loja
+enum class ProductCategory {
+    CPU,
+    GPU,
+    RAM,
+    STORAGE,
+    MOTHERBOARD,
+    PSU,
+    COOLING,
+    CASE,
+    PERIPHERAL
+};
+
 struct Product {
-    int id;             // ID único do produto
-    std::string name;   // Nome do produto
-    std::string desc;   // Descrição do produto
-    float price;        // Preço do produto
-    Color color;        // Cor associada ao produto para UI
+    int id;
+    std::string name;
+    std::string desc;
+    float price;
+    Color color;
+    ProductCategory category;
+    std::string imagePath; // Path to product image
 };
 
-// Estrutura que representa um item no carrinho
 struct CartItem {
-    Product product;  // Produto selecionado
-    int qty;          // Quantidade do produto
+    Product product;
+    int qty;
 };
 
-// Função que inicia a interface da loja
-// loginFunc é função callback para mostrar UI de login quando necessário
+enum class AdminAction {
+    NONE,
+    CREATE,
+    EDIT,
+    DELETE
+};
+
+// Export and utility functions
+void ExportToCSV(const std::vector<Product>& products);
+void GenerateReport(const std::vector<Product>& products);
+void CreateBackup(const std::vector<Product>& products);
+void LogAction(const std::string& action, const std::string& details);
+
 void RunTechcoreUI(int screenWidth, int screenHeight, bool (*loginFunc)(int, int));
+void ShowAdminPanel(int screenWidth, int screenHeight, std::vector<Product>& products, bool& showAdmin);
 }
 
-// Utilitário para desenhar um botão com texto
-// Retorna true se o botão for clicado
+// Button utility for use everywhere
 bool DrawButton(const char* label, Rectangle r, Color bg);

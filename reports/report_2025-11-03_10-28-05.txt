@@ -1,0 +1,44 @@
+========================================
+       RELATORIO DE PRODUTOS
+========================================
+Data: 2025-11-03_10-28-05
+
+ESTATISTICAS GERAIS:
+--------------------
+Total de Produtos: 120
+
+PRODUTOS POR CATEGORIA:
+----------------------
+CPU: 15 produtos (Total: EUR 5519.85)
+GPU: 18 produtos (Total: EUR 11809.82)
+RAM: 10 produtos (Total: EUR 1524.90)
+Storage: 15 produtos (Total: EUR 2499.85)
+Motherboard: 13 produtos (Total: EUR 3149.87)
+PSU: 10 produtos (Total: EUR 1354.90)
+Cooling: 10 produtos (Total: EUR 1214.90)
+Case: 10 produtos (Total: EUR 1254.90)
+Peripheral: 19 produtos (Total: EUR 4829.81)
+
+PRECOS:
+-------
+Valor Total Inventario: EUR 33158.82
+Preco Medio: EUR 276.32
+Preco Minimo: EUR 39.99
+Preco Maximo: EUR 1599.99
+
+TOP 10 MAIS CAROS:
+------------------
+1. NVIDIA RTX 4090 - EUR 1599.99 (GPU)
+2. NVIDIA RTX 3090 - EUR 1499.99 (GPU)
+3. NVIDIA RTX 4080 - EUR 1199.99 (GPU)
+4. AMD RX 6900 XT - EUR 999.99 (GPU)
+5. AMD RX 7900 XTX - EUR 999.99 (GPU)
+6. Acer Predator X34 - EUR 899.99 (Peripheral)
+7. NVIDIA RTX 3080 - EUR 699.99 (GPU)
+8. AMD Ryzen 9 7950X - EUR 699.99 (CPU)
+9. ASUS ROG Swift PG279Q - EUR 699.99 (Peripheral)
+10. NVIDIA RTX 4070 - EUR 599.99 (GPU)
+
+========================================
+           FIM DO RELATORIO
+========================================

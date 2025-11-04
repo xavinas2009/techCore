@@ -1,18 +1,21 @@
 #include <raylib.h>
 #include "gui.h"
 
-// Função principal para iniciar e rodar o programa
+bool RunLoginUI(int screenWidth, int screenHeight);
+
 int main() {
-    const int SCREEN_WIDTH = 1280;             // Largura da janela
-    const int SCREEN_HEIGHT = 720;             // Altura da janela
+    // HD resolution for fullscreen
+    const int SCREEN_WIDTH = 1920;
+    const int SCREEN_HEIGHT = 1080;
 
-    SetConfigFlags(FLAG_FULLSCREEN_MODE);      // Configura janela para fullscreen
+    // Set configuration flags for high quality rendering
+    SetConfigFlags(FLAG_FULLSCREEN_MODE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
 
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Techcore - PC Components Store"); // Inicializa janela
-    SetTargetFPS(60);                           // Define FPS alvo para renderização
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Techcore - PC Components Store");
+    SetTargetFPS(60);
 
-    techcore::RunTechcoreUI(SCREEN_WIDTH, SCREEN_HEIGHT, RunLoginUI); // Roda a interface da loja com UI de login
+    techcore::RunTechcoreUI(SCREEN_WIDTH, SCREEN_HEIGHT, RunLoginUI);
 
-    CloseWindow();                             // Fecha janela ao terminar
+    CloseWindow();
     return 0;
 }
