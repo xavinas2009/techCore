@@ -987,7 +987,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         // Abre modal do carrinho
         if(CheckCollisionPointRec(mp, cartBtn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
             showCart = true;
-            cartMessage = "";
+                cartMessage = "";
         }
         
         // Abre painel admin
@@ -1203,13 +1203,15 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                 else{
                     auto it=std::find_if(cart.begin(),cart.end(),
                         [&](const CartItem&c){return c.product.id==products[i].id;});
+                    char toastBuf[128];
                     if(it!=cart.end()) {
                         it->qty += selectedQty;
-                        snprintf((char*)toastMessage.c_str(), 64, "Adicionado %d unidade(s)!", selectedQty);
+                        snprintf(toastBuf, sizeof(toastBuf), "Adicionado %d unidade(s)!", selectedQty);
                     } else {
                         cart.push_back({products[i], selectedQty});
-                        snprintf((char*)toastMessage.c_str(), 64, "%d produto(s) adicionado(s)!", selectedQty);
+                        snprintf(toastBuf, sizeof(toastBuf), "%d produto(s) adicionado(s)!", selectedQty);
                     }
+                    toastMessage = std::string(toastBuf);
                     toastTimer = 2.0f;
                     selectedQty = 1; // Reset after adding
                 }
