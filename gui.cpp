@@ -19,16 +19,20 @@ static std::map<std::string, Texture2D> imageCache;
 static Texture2D placeholderImage;
 static bool placeholderLoaded = false;
 
-// Modern Theme colors
+// Product quantity selector cache (for selecting quantity before adding to cart)
+static std::map<int, int> productQuantitySelector;
+
+// Modern Theme colors - MELHORADA LEGIBILIDADE
 static const Color METAL_BG = {15, 15, 18, 255};
 static const Color METAL_PANEL = {28, 28, 32, 255};
 static const Color METAL_ACCENT = {65, 70, 80, 255};
-static const Color METAL_HIGHLIGHT = {220, 220, 225, 255};
-static const Color METAL_BRONZE = {140, 136, 132, 255};
+static const Color METAL_HIGHLIGHT = {240, 240, 245, 255};  // Mais brilhante
+static const Color METAL_BRONZE = {180, 176, 172, 255};     // Mais claro para melhor leitura
 static const Color BUTTON_BLUE = {59, 130, 246, 255};
 static const Color BUTTON_BLUE_HOVER = {96, 165, 250, 255};
 static const Color BUTTON_RED = {220, 38, 38, 255};
-static const Color TEXT_WHITE = {240, 240, 245, 255};
+static const Color TEXT_WHITE = {255, 255, 255, 255};       // Branco puro
+static const Color TEXT_GRAY = {200, 200, 205, 255};        // Cinza claro para texto secundário
 static const Color SHADOW_COLOR = {0, 0, 0, 80};
 static const Color CARD_HOVER = {38, 38, 42, 255};
 static const Color SUCCESS_GREEN = {34, 197, 94, 255};
@@ -55,6 +59,14 @@ int MeasureTextCustom(const char* text, int fontSize) {
     }
 }
 
+// Helper function to draw text with shadow for better readability
+void DrawTextWithShadow(const char* text, int posX, int posY, int fontSize, Color color, int shadowOffset = 2) {
+    // Draw shadow
+    DrawTextCustom(text, posX + shadowOffset, posY + shadowOffset, fontSize, SHADOW_COLOR);
+    // Draw main text
+    DrawTextCustom(text, posX, posY, fontSize, color);
+}
+
 // Enhanced Button utility with hover effect
 bool DrawButton(const char *label, Rectangle r, Color bg) {
     Vector2 mousePos = GetMousePosition();
@@ -78,8 +90,8 @@ bool DrawButton(const char *label, Rectangle r, Color bg) {
     Color borderColor = isHovered ? METAL_HIGHLIGHT : METAL_ACCENT;
     DrawRectangleLinesEx(r, 2.0f, borderColor);
     
-    int txtW = MeasureTextCustom(label, 18);
-    DrawTextCustom(label, (int)(r.x + (r.width-txtW)/2), (int)(r.y+(r.height-18)/2), 18, TEXT_WHITE);
+    int txtW = MeasureTextCustom(label, 20);
+    DrawTextCustom(label, (int)(r.x + (r.width-txtW)/2), (int)(r.y+(r.height-20)/2), 20, TEXT_WHITE);
     
     return isPressed;
 }
@@ -320,8 +332,8 @@ void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& car
             // Color indicator
             DrawRectangleRounded({itemCard.x + 5, itemCard.y + 5, 4, itemCard.height - 10}, 0.5f, 4, item.product.color);
             
-            // Product name
-            DrawTextCustom(item.product.name.c_str(), itemCard.x + 15, itemCard.y + 8, 15, METAL_HIGHLIGHT);
+            // Product name - MAIOR E MAIS VISÍVEL
+            DrawTextWithShadow(item.product.name.c_str(), itemCard.x + 15, itemCard.y + 6, 17, TEXT_WHITE);
             
             // Quantity controls
             Rectangle btnMinus = {itemCard.x + 15, itemCard.y + 28, 30, 18};
@@ -334,23 +346,23 @@ void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& car
             
             char qtyText[16];
             snprintf(qtyText, sizeof(qtyText), "%d", item.qty);
-            int qtyW = MeasureTextCustom(qtyText, 16);
-            DrawTextCustom(qtyText, itemCard.x + 45 + (30 - qtyW)/2, itemCard.y + 28, 16, TEXT_WHITE);
+            int qtyW = MeasureTextCustom(qtyText, 17);
+            DrawTextCustom(qtyText, itemCard.x + 45 + (30 - qtyW)/2, itemCard.y + 28, 17, TEXT_WHITE);
             
             if(DrawButton("+", btnPlus, SUCCESS_GREEN)) {
                 item.qty++;
             }
             
-            // Unit price
+            // Unit price - MAIS VISÍVEL
             char unitPrice[32];
             snprintf(unitPrice, sizeof(unitPrice), "EUR %.2f/un", item.product.price);
-            DrawTextCustom(unitPrice, itemCard.x + 120, itemCard.y + 30, 12, METAL_BRONZE);
+            DrawTextCustom(unitPrice, itemCard.x + 120, itemCard.y + 30, 14, TEXT_GRAY);
             
-            // Total price for this item
+            // Total price for this item - MAIOR E COM SOMBRA
             char priceBuf[32];
             snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", item.product.price * item.qty);
-            int priceW = MeasureTextCustom(priceBuf, 18);
-            DrawTextCustom(priceBuf, itemCard.x + itemCard.width - priceW - 12, itemCard.y + 15, 18, GOLD);
+            int priceW = MeasureTextCustom(priceBuf, 20);
+            DrawTextWithShadow(priceBuf, itemCard.x + itemCard.width - priceW - 12, itemCard.y + 14, 20, GOLD);
             
             y += 58;
             total += item.product.price * item.qty;
@@ -398,16 +410,16 @@ void DrawInputField(Rectangle box, const std::string& label, const std::string& 
     DrawRectangleRounded(box, 0.15f, 6, active ? METAL_ACCENT : METAL_BG);
     Color borderColor = active ? BUTTON_BLUE : METAL_ACCENT;
     DrawRectangleLinesEx(box, 2.0f, borderColor);
-    DrawTextCustom(label.c_str(), box.x, box.y - 22, 14, METAL_BRONZE);
+    DrawTextCustom(label.c_str(), box.x, box.y - 26, 17, TEXT_GRAY);  // Label maior e mais claro
     
     // Draw text with scissor
     BeginScissorMode(box.x + 4, box.y, box.width - 8, box.height);
-    DrawTextCustom(value.c_str(), box.x + 12, box.y + 11, 16, TEXT_WHITE);
+    DrawTextCustom(value.c_str(), box.x + 12, box.y + 9, 18, TEXT_WHITE);  // Texto maior
     
     // Cursor
     if(active && ((GetTime() * 2) - (int)(GetTime() * 2) < 0.5f)) {
-        int textW = MeasureTextCustom(value.c_str(), 16);
-        DrawRectangle(box.x + 12 + textW + 2, box.y + 11, 2, 18, BUTTON_BLUE);
+        int textW = MeasureTextCustom(value.c_str(), 18);
+        DrawRectangle(box.x + 12 + textW + 2, box.y + 9, 2, 20, BUTTON_BLUE);
     }
     EndScissorMode();
 }
@@ -509,7 +521,7 @@ void ShowAdminPanel(int screenWidth, int screenHeight, std::vector<Product>& pro
     
     // Header
     DrawRectangle(modal.x, modal.y, modal.width, 50, METAL_ACCENT);
-    DrawTextCustom("[*] Painel de Administracao - CRUD Produtos", modal.x+20, modal.y+15, 22, TEXT_WHITE);
+    DrawTextWithShadow("[*] Painel de Administracao - CRUD Produtos", modal.x+20, modal.y+12, 28, TEXT_WHITE);
     
     // Action buttons - Top row
     Rectangle btnCreate = {modal.x + 20, modal.y + 60, 120, 36};
@@ -975,7 +987,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         // Abre modal do carrinho
         if(CheckCollisionPointRec(mp, cartBtn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
             showCart = true;
-            cartMessage = "";
+                cartMessage = "";
         }
         
         // Abre painel admin
@@ -996,7 +1008,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         Rectangle textArea = {textStartX, searchBar.y, searchBar.width - 40, searchBar.height};
 
         if (!isSearchActive && search.empty()) {
-            DrawTextCustom(searchLabel, labelX, searchBar.y + 12, 16, METAL_BRONZE);
+            DrawTextCustom(searchLabel, labelX, searchBar.y + 10, 18, TEXT_GRAY);  // Maior e mais visível
         }
         if (CheckCollisionPointRec(GetMousePosition(), searchBar) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             isSearchActive = true;
@@ -1004,12 +1016,12 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             isSearchActive = false;
         }
         if (isSearchActive) {
-            DrawTextCustom("[?]", labelX, searchBar.y + 12, 16, BUTTON_BLUE);
-            float textWidth = MeasureTextCustom(search.c_str(), 16);
+            DrawTextCustom("[?]", labelX, searchBar.y + 10, 18, BUTTON_BLUE);
+            float textWidth = MeasureTextCustom(search.c_str(), 18);
             BeginScissorMode((int)textArea.x, (int)textArea.y, (int)textArea.width, (int)textArea.height);
-            DrawTextCustom(search.c_str(), (int)textStartX + 20, searchBar.y + 12, 16, TEXT_WHITE);
+            DrawTextCustom(search.c_str(), (int)textStartX + 20, searchBar.y + 10, 18, TEXT_WHITE);
             if (((GetTime() * 2) - (int)(GetTime() * 2) < 0.5f)) {
-                DrawRectangle((int)textStartX + 20 + (int)textWidth + 2, searchBar.y + 12, 2, 18, BUTTON_BLUE);
+                DrawRectangle((int)textStartX + 20 + (int)textWidth + 2, searchBar.y + 10, 2, 20, BUTTON_BLUE);
             }
             EndScissorMode();
         }
@@ -1140,35 +1152,68 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                           {0, 0}, 0, WHITE);
             DrawRectangleLinesEx(imgRect, 1, METAL_ACCENT);
             
-            // Product name (shifted right to make room for image)
-            DrawTextCustom(products[i].name.c_str(), x+115, y+16, 18, METAL_HIGHLIGHT);
+            // Product name (shifted right to make room for image) - FONTE MAIOR
+            DrawTextWithShadow(products[i].name.c_str(), x+115, y+16, 24, TEXT_WHITE);
             
-            // Description (shifted right)
-            DrawTextCustom(products[i].desc.c_str(), x+115, y+44, 14, METAL_BRONZE);
+            // Description (shifted right) - FONTE MAIOR
+            DrawTextCustom(products[i].desc.c_str(), x+115, y+50, 16, TEXT_GRAY);
             
             // Price badge
             char priceBuf[32]; 
             snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", products[i].price);
-            int priceW = MeasureTextCustom(priceBuf, 18);
-            Rectangle priceBadge = {x + cardW - priceW - 30, y + 14, (float)priceW + 20, 26};
+            int priceW = MeasureTextCustom(priceBuf, 22);
+            Rectangle priceBadge = {x + cardW - priceW - 30, y + 14, (float)priceW + 20, 30};
             DrawRectangleRounded(priceBadge, 0.3f, 6, Fade(GOLD, 0.15f));
-            DrawTextCustom(priceBuf, priceBadge.x + 10, priceBadge.y + 5, 18, GOLD);
+            DrawTextWithShadow(priceBuf, priceBadge.x + 10, priceBadge.y + 5, 22, GOLD);
 
-            // Add button
-            Rectangle btn = {x+cardW-150, y+cardH-42, 130, 34};
-            if(DrawButton("+ Adicionar", btn, BUTTON_BLUE)){
+            // Quantity selector with +/- buttons
+            // Initialize quantity if not set
+            if(productQuantitySelector.find(products[i].id) == productQuantitySelector.end()) {
+                productQuantitySelector[products[i].id] = 1;
+            }
+            int& selectedQty = productQuantitySelector[products[i].id];
+            
+            // Quantity control buttons
+            Rectangle btnQtyMinus = {x + 115, y + cardH - 40, 35, 32};
+            Rectangle btnQtyDisplay = {x + 155, y + cardH - 40, 50, 32};
+            Rectangle btnQtyPlus = {x + 210, y + cardH - 40, 35, 32};
+            
+            // Minus button
+            if(DrawButton("-", btnQtyMinus, BUTTON_RED)) {
+                if(selectedQty > 1) selectedQty--;
+            }
+            
+            // Quantity display
+            char qtyBuf[16];
+            snprintf(qtyBuf, sizeof(qtyBuf), "%d", selectedQty);
+            DrawRectangleRounded(btnQtyDisplay, 0.1f, 4, METAL_ACCENT);
+            DrawRectangleLinesEx(btnQtyDisplay, 1.0f, METAL_HIGHLIGHT);
+            int qtyTextW = MeasureTextCustom(qtyBuf, 18);
+            DrawTextCustom(qtyBuf, btnQtyDisplay.x + (btnQtyDisplay.width - qtyTextW) / 2, btnQtyDisplay.y + 7, 18, TEXT_WHITE);
+            
+            // Plus button
+            if(DrawButton("+", btnQtyPlus, SUCCESS_GREEN)) {
+                selectedQty++;
+            }
+            
+            // Add to cart button (uses selected quantity)
+            Rectangle btn = {x + cardW - 130, y + cardH - 40, 115, 32};
+            if(DrawButton("Carrinho", btn, BUTTON_BLUE)){
                 if(!isLoggedIn) showLoginPrompt=true;
                 else{
                     auto it=std::find_if(cart.begin(),cart.end(),
                         [&](const CartItem&c){return c.product.id==products[i].id;});
+                    char toastBuf[128];
                     if(it!=cart.end()) {
-                        it->qty+=1;
-                        toastMessage = "Quantidade atualizada!";
+                        it->qty += selectedQty;
+                        snprintf(toastBuf, sizeof(toastBuf), "Adicionado %d unidade(s)!", selectedQty);
                     } else {
-                        cart.push_back({products[i],1});
-                        toastMessage = "Produto adicionado ao carrinho!";
+                        cart.push_back({products[i], selectedQty});
+                        snprintf(toastBuf, sizeof(toastBuf), "%d produto(s) adicionado(s)!", selectedQty);
                     }
+                    toastMessage = std::string(toastBuf);
                     toastTimer = 2.0f;
+                    selectedQty = 1; // Reset after adding
                 }
             }
         }
