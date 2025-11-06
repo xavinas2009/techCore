@@ -8,7 +8,7 @@
 8|Intel Core i7-12700K|12-Core (8P+4E), Up to 5.0GHz|389.99|0,121,241|CPU|thumbnails/cpu.png|1|0|0|4.1
 9|Intel Core i9-12900K|16-Core (8P+8E), Up to 5.2GHz|589.99|0,121,241|CPU|thumbnails/cpu.png|1|1|16|3.4
 10|Intel Core i5-13600K|14-Core (6P+8E), Up to 5.1GHz|319.99|0,121,241|CPU|thumbnails/cpu.png|1|0|0|3.8
-11|Intel Core i7-13700K|16-Core (8P+8E), Up to 5.4GHz|419.99|0,121,241|CPU|thumbnails/cpu.png|1|0|0|4.0
+11|Intel Core i7-13700K|16-Core (8P+8E), Up to 5.4GHz|419.99|0,121,241|CPU|thumbnails/cpu.png|1|0|0|4
 12|Intel Core i9-13900K|24-Core (8P+16E), Up to 5.8GHz|589.99|0,121,241|CPU|thumbnails/cpu.png|1|0|0|3.4
 13|AMD Ryzen 5 5600G|6-Core/12-Thread with Radeon Graphics|159.99|255,161,0|CPU|thumbnails/cpu.png|1|0|0|4.5
 14|Intel Core i3-12100F|4-Core/8-Thread, Up to 4.3GHz|109.99|0,121,241|CPU|thumbnails/cpu.png|1|0|0|4.1
@@ -18,11 +18,11 @@
 18|NVIDIA RTX 3080|10GB GDDR6X, 8704 CUDA Cores|699.99|0,228,48|GPU|thumbnails/gpu.png|0|0|0|3.4
 19|NVIDIA RTX 3090|24GB GDDR6X, 10496 CUDA Cores|1499.99|0,228,48|GPU|thumbnails/gpu.png|1|0|0|4.7
 20|NVIDIA RTX 4060 Ti|8GB GDDR6, 4352 CUDA Cores|399.99|0,228,48|GPU|thumbnails/gpu.png|1|0|0|4.1
-21|NVIDIA RTX 4070|12GB GDDR6X, 5888 CUDA Cores|599.99|0,228,48|GPU|thumbnails/gpu.png|1|0|0|4.0
+21|NVIDIA RTX 4070|12GB GDDR6X, 5888 CUDA Cores|599.99|0,228,48|GPU|thumbnails/gpu.png|1|0|0|4
 22|NVIDIA RTX 4080|16GB GDDR6X, 9728 CUDA Cores|1199.99|0,228,48|GPU|thumbnails/gpu.png|0|1|29|4.7
 23|NVIDIA RTX 4090|24GB GDDR6X, 16384 CUDA Cores|1599.99|0,228,48|GPU|thumbnails/gpu.png|1|0|0|3.4
 24|AMD RX 6600|8GB GDDR6, 1792 Stream Processors|269.99|220,38,38|GPU|thumbnails/gpu.png|1|0|0|3.3
-25|AMD RX 6700 XT|12GB GDDR6, 2560 Stream Processors|449.99|220,38,38|GPU|thumbnails/gpu.png|1|0|0|4.0
+25|AMD RX 6700 XT|12GB GDDR6, 2560 Stream Processors|449.99|220,38,38|GPU|thumbnails/gpu.png|1|0|0|4
 26|AMD RX 6800|16GB GDDR6, 3840 Stream Processors|579.99|220,38,38|GPU|thumbnails/gpu.png|1|0|0|4.6
 27|AMD RX 6900 XT|16GB GDDR6, 5120 Stream Processors|999.99|220,38,38|GPU|thumbnails/gpu.png|1|0|0|4.3
 28|AMD RX 7600|8GB GDDR6, 2048 Stream Processors|269.99|220,38,38|GPU|thumbnails/gpu.png|1|0|0|4.4
@@ -75,7 +75,7 @@
 75|EVGA SuperNOVA 850 G6|850W 80+ Gold Modular|129.99|255,203,0|PSU|thumbnails/psu.png|1|0|0|4.2
 76|Seasonic Focus GX-850|850W 80+ Gold Modular|134.99|255,203,0|PSU|thumbnails/psu.png|0|0|0|4.7
 77|be quiet! Straight Power 11|750W 80+ Platinum Modular|149.99|255,203,0|PSU|thumbnails/psu.png|1|1|15|4.1
-78|Corsair HX1000|1000W 80+ Platinum Modular|199.99|255,203,0|PSU|thumbnails/psu.png|1|0|0|4.0
+78|Corsair HX1000|1000W 80+ Platinum Modular|199.99|255,203,0|PSU|thumbnails/psu.png|1|0|0|4
 79|Thermaltake Toughpower GF1|850W 80+ Gold Modular|119.99|255,203,0|PSU|thumbnails/psu.png|1|1|24|4.4
 80|MSI MPG A850GF|850W 80+ Gold Modular|139.99|255,203,0|PSU|thumbnails/psu.png|1|1|28|4.4
 81|NZXT C750|750W 80+ Gold Modular|109.99|255,203,0|PSU|thumbnails/psu.png|1|0|0|4.7

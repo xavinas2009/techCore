@@ -36,6 +36,7 @@ static const Color TEXT_GRAY = {200, 200, 205, 255};        // Cinza claro para 
 static const Color SHADOW_COLOR = {0, 0, 0, 80};
 static const Color CARD_HOVER = {38, 38, 42, 255};
 static const Color SUCCESS_GREEN = {34, 197, 94, 255};
+static const Color SUCCESS_GREEN_HOVER = {74, 222, 128, 255};
 
 // Helper function to draw text with custom font (HD rendering)
 void DrawTextCustom(const char* text, int posX, int posY, int fontSize, Color color) {
@@ -176,7 +177,7 @@ std::vector<Product> defaultProducts() {
     return {};
 }
 
-void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highlightAdminBtn, bool isLoggedIn) {
+void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highlightAdminBtn, bool isLoggedIn, bool highlightUserBtn, const std::string& username) {
     // Load logo image (once)
     static Texture2D logoImage = {0};
     static bool logoLoaded = false;
@@ -215,7 +216,7 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
     // Admin button (only if logged in)
     if(isLoggedIn) {
         float adminBtnW = 140, adminBtnH = 44;
-        float adminBtnX = screenW - adminBtnW - 180, adminBtnY = 18;
+        float adminBtnX = screenW - adminBtnW - 340, adminBtnY = 18;
         Rectangle adminBtn = {adminBtnX, adminBtnY, adminBtnW, adminBtnH};
         
         Color adminBg = highlightAdminBtn ? ColorBrightness(PURPLE, 0.2f) : PURPLE;
@@ -228,6 +229,22 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
         int adminTxW = MeasureTextCustom(adminText, 18);
         DrawTextCustom(adminText, (int)(adminBtnX + adminBtnW/2 - adminTxW/2), (int)(adminBtnY + adminBtnH/2 - 9), 18, TEXT_WHITE);
     }
+    
+    // User profile button (logged in) or Login button (not logged in)
+    float userBtnW = 150, userBtnH = 44;
+    float userBtnX = screenW - userBtnW - 180, userBtnY = 18;
+    Rectangle userBtn = {userBtnX, userBtnY, userBtnW, userBtnH};
+    
+    Color userBg = highlightUserBtn ? SUCCESS_GREEN_HOVER : SUCCESS_GREEN;
+    if(!isLoggedIn) userBg = highlightUserBtn ? METAL_ACCENT : METAL_PANEL;
+    
+    DrawRectangle(userBtn.x + 2, userBtn.y + 2, userBtn.width, userBtn.height, Fade(SHADOW_COLOR, 0.3f));
+    DrawRectangleRounded(userBtn, 0.25f, 8, userBg);
+    DrawRectangleLinesEx(userBtn, 2.0f, METAL_HIGHLIGHT);
+    
+    std::string userText = isLoggedIn ? "[@] " + username : "[!] Login";
+    int userTxW = MeasureTextCustom(userText.c_str(), 18);
+    DrawTextCustom(userText.c_str(), (int)(userBtnX + userBtnW/2 - userTxW/2), (int)(userBtnY + userBtnH/2 - 9), 18, TEXT_WHITE);
 
     // Cart button with modern styling
     float btnW = 140, btnH = 44;
@@ -256,7 +273,7 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
     DrawTextCustom(text.c_str(), (int)(btnX+btnW/2-txW/2), (int)(btnY+btnH/2-9), 18, TEXT_WHITE);
 }
 
-void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& cart, bool& showModal, std::string& cartMessage) {
+void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& cart, bool& showModal, std::string& cartMessage, bool& showCheckout, bool isLoggedIn, bool& showLoginPrompt) {
     // Modal backdrop with blur effect
     DrawRectangle(0,0,screenWidth,screenHeight, Fade(BLACK,0.75f));
     
@@ -366,10 +383,14 @@ void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& car
     Rectangle btnLimpar{modal.x+194, modal.y+mh-70, 140, 40};
     Rectangle btnContinuar{modal.x+modal.width-174, modal.y+mh-70, 150, 40};
 
-    if(!cart.empty() && DrawButton("Finalizar", btnFinalizar, BUTTON_BLUE)) {
-        cartMessage = "[OK] Compra registada com sucesso!";
-        showModal = false;
-        cart.clear();
+    if(!cart.empty() && DrawButton("Finalizar Compra", btnFinalizar, SUCCESS_GREEN)) {
+        if(!isLoggedIn) {
+            showLoginPrompt = true;
+            cartMessage = "Faca login para finalizar a compra!";
+        } else {
+            showCheckout = true;
+            showModal = false;
+        }
     }
     
     if(!cart.empty() && DrawButton("Limpar", btnLimpar, BUTTON_RED)) {
@@ -970,8 +991,19 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     
     std::vector<Product> products = LoadProducts();
     std::vector<CartItem> cart;
+    std::vector<User> users = LoadUsers();
+    std::vector<Order> orders = LoadOrders();
+    std::vector<Review> reviews = LoadReviews();
+    
     static bool isLoggedIn = false;
+    User* currentUser = nullptr;
+    std::string currentUsername = "";
     bool showLoginPrompt = false;
+    bool showRegisterModal = false;
+    bool showUserProfile = false;
+    bool showWishlist = false;
+    bool showOrderHistory = false;
+    bool showCheckout = false;
     bool showAdmin = false;
 
     std::vector<std::string> categories = {"All","CPU","GPU","RAM","Storage","Motherboard","PSU","Cooling","Case","Peripheral"};
@@ -981,7 +1013,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     bool showCart = false;
     bool showProductDetails = false;
     int selectedProductForDetails = -1;
-    std::string cartMessage;
+    std::string cartMessage = "";
     std::string toastMessage = "";
     float toastTimer = 0.0f;
     bool showCategoryFilter = false; // Toggle for category dropdown
@@ -1029,6 +1061,13 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     float scrollOffset = 0.0f;
     float scrollSpeed = 30.0f;
     float maxScroll = 0.0f;
+    bool isDraggingScrollbar = false;
+    float dragScrollStartY = 0.0f;
+    float dragScrollStartOffset = 0.0f;
+    
+    // Pagination
+    int currentPage = 0;
+    int productsPerPage = 20;
     
     // Sorting
     enum SortMode { SORT_NONE, SORT_PRICE_ASC, SORT_PRICE_DESC, SORT_NAME };
@@ -1073,11 +1112,17 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         bool highlightCart = CheckCollisionPointRec(mp, cartBtn);
         
         float adminBtnW = 140, adminBtnH = 44;
-        float adminBtnX = screenWidth - adminBtnW - 180, adminBtnY = 18;
+        float adminBtnX = screenWidth - adminBtnW - 340, adminBtnY = 18;
         Rectangle adminBtn = {adminBtnX, adminBtnY, adminBtnW, adminBtnH};
         bool highlightAdmin = isLoggedIn && CheckCollisionPointRec(mp, adminBtn);
+        
+        // User button
+        float userBtnW = 150, userBtnH = 44;
+        float userBtnX = screenWidth - userBtnW - 180, userBtnY = 18;
+        Rectangle userBtn = {userBtnX, userBtnY, userBtnW, userBtnH};
+        bool highlightUser = CheckCollisionPointRec(mp, userBtn);
 
-        DrawHeader(screenWidth, (int)cart.size(), highlightCart, highlightAdmin, isLoggedIn);
+        DrawHeader(screenWidth, (int)cart.size(), highlightCart, highlightAdmin, isLoggedIn, highlightUser, currentUsername);
 
         // Abre modal do carrinho
         if(CheckCollisionPointRec(mp, cartBtn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
@@ -1089,12 +1134,24 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         if(isLoggedIn && CheckCollisionPointRec(mp, adminBtn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
             showAdmin = true;
         }
+        
+        // User button - show login modal or user profile
+        if(CheckCollisionPointRec(mp, userBtn) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if(isLoggedIn) {
+                showUserProfile = !showUserProfile;
+            } else {
+                showLoginPrompt = true;
+            }
+        }
 
         // ========== FILTER SIDEBAR WITH SCROLL ==========
         float filterX = 10;
         float filterY = 90;
         float filterWidth = 320;
         static float filterScrollOffset = 0.0f;
+        static bool isDraggingFilterScrollbar = false;
+        static float dragFilterScrollStartY = 0.0f;
+        static float dragFilterScrollStartOffset = 0.0f;
         
         // Filter scroll area
         Rectangle filterScrollArea = {0, filterY, filterWidth + 20, (float)screenHeight - filterY};
@@ -1424,7 +1481,8 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         float filterMaxScroll = filterContentHeight - filterScrollArea.height;
         if(filterMaxScroll < 0) filterMaxScroll = 0;
         
-        if(CheckCollisionPointRec(GetMousePosition(), filterScrollArea)) {
+        // Mouse wheel scrolling for filters (disable while dragging)
+        if(CheckCollisionPointRec(GetMousePosition(), filterScrollArea) && !isDraggingFilterScrollbar) {
             float wheel = GetMouseWheelMove();
             if(wheel != 0) {
                 filterScrollOffset -= wheel * 30.0f;
@@ -1445,7 +1503,37 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             float thumbHeight = (filterScrollArea.height / (filterContentHeight)) * scrollbarHeight;
             if(thumbHeight < 30) thumbHeight = 30;
             float thumbY = scrollbarY + (filterScrollOffset / filterMaxScroll) * (scrollbarHeight - thumbHeight);
-            DrawRectangleRounded({scrollbarX, thumbY, scrollbarWidth, thumbHeight}, 0.5f, 4, BUTTON_BLUE);
+            Rectangle filterScrollThumb = {scrollbarX, thumbY, scrollbarWidth, thumbHeight};
+            
+            // Check if mouse is over filter scrollbar thumb
+            bool hoverFilterThumb = CheckCollisionPointRec(GetMousePosition(), filterScrollThumb);
+            Color filterThumbColor = hoverFilterThumb ? Fade(BUTTON_BLUE, 1.0f) : BUTTON_BLUE;
+            
+            // Handle filter scrollbar dragging
+            if(hoverFilterThumb && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                isDraggingFilterScrollbar = true;
+                dragFilterScrollStartY = GetMousePosition().y;
+                dragFilterScrollStartOffset = filterScrollOffset;
+            }
+            
+            if(isDraggingFilterScrollbar) {
+                if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                    float mouseY = GetMousePosition().y;
+                    float deltaY = mouseY - dragFilterScrollStartY;
+                    float scrollRange = scrollbarHeight - thumbHeight;
+                    float scrollDelta = (deltaY / scrollRange) * filterMaxScroll;
+                    
+                    filterScrollOffset = dragFilterScrollStartOffset + scrollDelta;
+                    if(filterScrollOffset < 0) filterScrollOffset = 0;
+                    if(filterScrollOffset > filterMaxScroll) filterScrollOffset = filterMaxScroll;
+                    
+                    filterThumbColor = Fade(BUTTON_BLUE_HOVER, 1.0f);
+                } else {
+                    isDraggingFilterScrollbar = false;
+                }
+            }
+            
+            DrawRectangleRounded(filterScrollThumb, 0.5f, 4, filterThumbColor);
         }
 
         // Modern search bar with icon - moved to right side to avoid filter sidebar
@@ -1632,6 +1720,23 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                 return products[a].name < products[b].name;
             });
         }
+        
+        // Calculate total pages
+        int totalProducts = (int)visible.size();
+        int totalPages = (totalProducts + productsPerPage - 1) / productsPerPage;
+        if(totalPages < 1) totalPages = 1;
+        
+        // Clamp current page
+        if(currentPage >= totalPages) currentPage = totalPages - 1;
+        if(currentPage < 0) currentPage = 0;
+        
+        // Get products for current page
+        int startIdx = currentPage * productsPerPage;
+        int endIdx = std::min(startIdx + productsPerPage, totalProducts);
+        std::vector<int> pageVisible;
+        for(int i = startIdx; i < endIdx; i++) {
+            pageVisible.push_back(visible[i]);
+        }
 
         // Sort buttons (moved to right side)
         Rectangle btnSortPrice = {1600, 110, 90, 40};
@@ -1648,19 +1753,21 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             sortMode = SORT_NONE;
         }
 
-        // Product counter
-        char counterText[64];
-        snprintf(counterText, sizeof(counterText), "Mostrando %d de %d produtos", (int)visible.size(), (int)products.size());
-        DrawTextCustom(counterText, 1400, 120, 14, METAL_BRONZE);
+        // Product counter with pagination info
+        char counterText[128];
+        snprintf(counterText, sizeof(counterText), "Mostrando %d-%d de %d produtos | Pagina %d/%d", 
+                 startIdx + 1, endIdx, totalProducts, currentPage + 1, totalPages);
+        DrawTextCustom(counterText, 1200, 120, 14, METAL_BRONZE);
         
         // Calculate max scroll based on content
-        int totalRows = (visible.size() + cols - 1) / cols;
+        int totalRows = (pageVisible.size() + cols - 1) / cols;
         float contentHeight = totalRows * (cardH + gutter);
-        float viewportHeight = screenHeight - 220; // Adjusted for new compact UI
+        float paginationHeight = totalPages > 1 ? 70 : 0; // Reserve space for pagination if needed
+        float viewportHeight = screenHeight - 220 - paginationHeight; // Adjusted for UI and pagination
         maxScroll = contentHeight > viewportHeight ? contentHeight - viewportHeight : 0;
         
-        // Handle scroll wheel input
-        if(!showCart && !showAdmin && !isSearchActive && !showCategoryFilter) {
+        // Handle scroll wheel input (disable while dragging scrollbar)
+        if(!showCart && !showAdmin && !isSearchActive && !showCategoryFilter && !isDraggingScrollbar && !showProductDetails) {
             float wheelMove = GetMouseWheelMove();
             if(wheelMove != 0) {
                 scrollOffset -= wheelMove * scrollSpeed;
@@ -1676,8 +1783,8 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
 
         // MODERN PRODUCT GRID with hover effects and scroll
         float productStartX = 350; // Start products after filter sidebar
-        for(size_t k=0;k<visible.size();++k){
-            int i=visible[k];
+        for(size_t k=0;k<pageVisible.size();++k){
+            int i=pageVisible[k];
             int row=k/cols, col=k%cols;
             float x=productStartX+col*(cardW+gutter);
             float y=190+row*(cardH+gutter) - scrollOffset;
@@ -1716,6 +1823,43 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                           imgRect,
                           {0, 0}, 0, WHITE);
             DrawRectangleLinesEx(imgRect, 1, METAL_ACCENT);
+            
+            // Wishlist heart icon (only if logged in)
+            if(isLoggedIn && currentUser != nullptr) {
+                bool isInWishlist = std::find(currentUser->wishlist.begin(), currentUser->wishlist.end(), products[i].id) != currentUser->wishlist.end();
+                Rectangle heartBtn = {x + cardW - 45, y + 75, 35, 35};
+                bool heartHover = CheckCollisionPointRec(GetMousePosition(), heartBtn);
+                
+                Color heartColor = isInWishlist ? BUTTON_RED : METAL_ACCENT;
+                if(heartHover) heartColor = isInWishlist ? ColorBrightness(BUTTON_RED, 0.2f) : METAL_HIGHLIGHT;
+                
+                DrawRectangleRounded(heartBtn, 0.2f, 8, Fade(heartColor, 0.3f));
+                DrawRectangleLinesEx(heartBtn, 2, heartColor);
+                
+                // Heart icon (♥)
+                const char* heartIcon = isInWishlist ? "@" : "o";
+                int heartW = MeasureTextCustom(heartIcon, 24);
+                DrawTextCustom(heartIcon, heartBtn.x + (heartBtn.width - heartW) / 2, heartBtn.y + 6, 24, heartColor);
+                
+                if(heartHover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if(isInWishlist) {
+                        // Remove from wishlist
+                        currentUser->wishlist.erase(
+                            std::remove(currentUser->wishlist.begin(), currentUser->wishlist.end(), products[i].id),
+                            currentUser->wishlist.end()
+                        );
+                        SaveUsers(users);
+                        toastMessage = "Removido da lista de desejos!";
+                        toastTimer = 2.0f;
+                    } else {
+                        // Add to wishlist
+                        currentUser->wishlist.push_back(products[i].id);
+                        SaveUsers(users);
+                        toastMessage = "Adicionado a lista de desejos!";
+                        toastTimer = 2.0f;
+                    }
+                }
+            }
             
             // Product name (shifted right to make room for image) - FONTE MAIOR
             DrawTextWithShadow(products[i].name.c_str(), x+115, y+16, 24, TEXT_WHITE);
@@ -1835,7 +1979,79 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             float thumbHeight = (viewportHeight / (contentHeight + viewportHeight)) * scrollbarHeight;
             if(thumbHeight < 30) thumbHeight = 30;
             float thumbY = scrollbarY + (scrollOffset / maxScroll) * (scrollbarHeight - thumbHeight);
-            DrawRectangleRounded({scrollbarX, thumbY, scrollbarWidth, thumbHeight}, 0.5f, 4, BUTTON_BLUE);
+            Rectangle scrollThumb = {scrollbarX, thumbY, scrollbarWidth, thumbHeight};
+            
+            // Check if mouse is over scrollbar thumb
+            bool hoverThumb = CheckCollisionPointRec(GetMousePosition(), scrollThumb);
+            Color thumbColor = hoverThumb ? Fade(BUTTON_BLUE, 1.0f) : BUTTON_BLUE;
+            
+            // Handle scrollbar dragging
+            if(hoverThumb && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                isDraggingScrollbar = true;
+                dragScrollStartY = GetMousePosition().y;
+                dragScrollStartOffset = scrollOffset;
+            }
+            
+            if(isDraggingScrollbar) {
+                if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                    float mouseY = GetMousePosition().y;
+                    float deltaY = mouseY - dragScrollStartY;
+                    float scrollRange = scrollbarHeight - thumbHeight;
+                    float scrollDelta = (deltaY / scrollRange) * maxScroll;
+                    
+                    scrollOffset = dragScrollStartOffset + scrollDelta;
+                    if(scrollOffset < 0) scrollOffset = 0;
+                    if(scrollOffset > maxScroll) scrollOffset = maxScroll;
+                    
+                    thumbColor = Fade(BUTTON_BLUE_HOVER, 1.0f);
+                } else {
+                    isDraggingScrollbar = false;
+                }
+            }
+            
+            DrawRectangleRounded(scrollThumb, 0.5f, 4, thumbColor);
+        }
+        
+        // Pagination controls at bottom
+        if(totalPages > 1) {
+            float paginationY = screenHeight - 60;
+            float paginationX = screenWidth / 2 - 250;
+            
+            // Previous button
+            Rectangle btnPrev = {paginationX, paginationY, 100, 40};
+            if(DrawButton("<< Anterior", btnPrev, currentPage > 0 ? BUTTON_BLUE : METAL_ACCENT)) {
+                if(currentPage > 0) {
+                    currentPage--;
+                    scrollOffset = 0; // Reset scroll when changing pages
+                }
+            }
+            
+            // Page info
+            char pageInfo[64];
+            snprintf(pageInfo, sizeof(pageInfo), "Pagina %d / %d", currentPage + 1, totalPages);
+            DrawTextCustom(pageInfo, paginationX + 120, paginationY + 12, 18, TEXT_WHITE);
+            
+            // Next button
+            Rectangle btnNext = {paginationX + 250, paginationY, 100, 40};
+            if(DrawButton("Proximo >>", btnNext, currentPage < totalPages - 1 ? BUTTON_BLUE : METAL_ACCENT)) {
+                if(currentPage < totalPages - 1) {
+                    currentPage++;
+                    scrollOffset = 0; // Reset scroll when changing pages
+                }
+            }
+            
+            // Quick page jump buttons (first 5 pages)
+            float quickJumpX = paginationX + 370;
+            for(int p = 0; p < std::min(5, totalPages); p++) {
+                Rectangle btnPage = {quickJumpX + p * 45, paginationY, 40, 40};
+                char pageNum[8];
+                snprintf(pageNum, sizeof(pageNum), "%d", p + 1);
+                Color pageColor = (p == currentPage) ? SUCCESS_GREEN : METAL_PANEL;
+                if(DrawButton(pageNum, btnPage, pageColor)) {
+                    currentPage = p;
+                    scrollOffset = 0;
+                }
+            }
         }
 
         // Category filter button with dropdown (DRAWN AFTER products to appear on top) - moved to right
@@ -1885,6 +2101,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                     selectedCategory = categories[ci];
                     showCategoryFilter = false;
                     scrollOffset = 0; // Reset scroll when changing category
+                    currentPage = 0;  // Reset to first page
                 }
                 
                 chipX += 98;
@@ -1913,7 +2130,837 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
 
         // MODAL DO CARRINHO
         if(showCart){
-            ShowCartModal(screenWidth, screenHeight, cart, showCart, cartMessage);
+            ShowCartModal(screenWidth, screenHeight, cart, showCart, cartMessage, showCheckout, isLoggedIn, showLoginPrompt);
+        }
+        
+        // LOGIN/REGISTER MODAL
+        if(showLoginPrompt) {
+            // Dark overlay
+            DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.75f));
+            
+            enum AuthMode { LOGIN, REGISTER };
+            static AuthMode authMode = LOGIN;
+            static std::string authUsername = "";
+            static std::string authPassword = "";
+            static std::string authEmail = "";
+            static bool typingUsername = false;
+            static bool typingPassword = false;
+            static bool typingEmail = false;
+            static std::string authMessage = "";
+            static Color authMessageColor = BUTTON_RED;
+            
+            // Modal window
+            float modalWidth = authMode == REGISTER ? 500 : 450;
+            float modalHeight = authMode == REGISTER ? 420 : 350;
+            Rectangle modal = {(float)screenWidth/2 - modalWidth/2, (float)screenHeight/2 - modalHeight/2, modalWidth, modalHeight};
+            
+            DrawRectangle(modal.x + 4, modal.y + 4, modal.width, modal.height, Fade(SHADOW_COLOR, 0.5f));
+            DrawRectangleRounded(modal, 0.03f, 8, METAL_PANEL);
+            DrawRectangleLinesEx(modal, 3, BUTTON_BLUE);
+            
+            // Close button
+            Rectangle btnClose = {modal.x + modal.width - 45, modal.y + 10, 35, 35};
+            if(DrawButton("X", btnClose, BUTTON_RED)) {
+                showLoginPrompt = false;
+                authUsername = "";
+                authPassword = "";
+                authEmail = "";
+                authMessage = "";
+                typingUsername = false;
+                typingPassword = false;
+                typingEmail = false;
+            }
+            
+            // Title
+            const char* titleText = authMode == LOGIN ? "Login" : "Criar Conta";
+            DrawTextWithShadow(titleText, modal.x + 30, modal.y + 25, 32, TEXT_WHITE);
+            
+            float fieldX = modal.x + 30;
+            float fieldY = modal.y + 85;
+            float fieldWidth = modalWidth - 60;
+            float fieldHeight = 45;
+            float fieldSpacing = 65;
+            
+            // Username field
+            DrawTextCustom("Utilizador:", fieldX, fieldY - 25, 18, TEXT_WHITE);
+            Rectangle usernameField = {fieldX, fieldY, fieldWidth, fieldHeight};
+            DrawRectangleRounded(usernameField, 0.1f, 8, typingUsername ? METAL_ACCENT : METAL_BG);
+            DrawRectangleLinesEx(usernameField, 2, typingUsername ? BUTTON_BLUE : METAL_ACCENT);
+            DrawTextCustom(authUsername.c_str(), fieldX + 15, fieldY + 13, 18, TEXT_WHITE);
+            
+            if(CheckCollisionPointRec(GetMousePosition(), usernameField) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                typingUsername = true;
+                typingPassword = false;
+                typingEmail = false;
+            }
+            
+            if(typingUsername) {
+                int key = GetCharPressed();
+                while(key > 0) {
+                    if(key >= 32 && key <= 125 && authUsername.length() < 20) {
+                        authUsername += (char)key;
+                    }
+                    key = GetCharPressed();
+                }
+                if(IsKeyPressed(KEY_BACKSPACE) && authUsername.length() > 0) {
+                    authUsername.pop_back();
+                }
+                if(IsKeyPressed(KEY_TAB)) {
+                    typingUsername = false;
+                    typingPassword = true;
+                }
+            }
+            
+            fieldY += fieldSpacing;
+            
+            // Password field
+            DrawTextCustom("Password:", fieldX, fieldY - 25, 18, TEXT_WHITE);
+            Rectangle passwordField = {fieldX, fieldY, fieldWidth, fieldHeight};
+            DrawRectangleRounded(passwordField, 0.1f, 8, typingPassword ? METAL_ACCENT : METAL_BG);
+            DrawRectangleLinesEx(passwordField, 2, typingPassword ? BUTTON_BLUE : METAL_ACCENT);
+            
+            // Show password as asterisks
+            std::string passwordDisplay(authPassword.length(), '*');
+            DrawTextCustom(passwordDisplay.c_str(), fieldX + 15, fieldY + 13, 18, TEXT_WHITE);
+            
+            if(CheckCollisionPointRec(GetMousePosition(), passwordField) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                typingUsername = false;
+                typingPassword = true;
+                typingEmail = false;
+            }
+            
+            if(typingPassword) {
+                int key = GetCharPressed();
+                while(key > 0) {
+                    if(key >= 32 && key <= 125 && authPassword.length() < 30) {
+                        authPassword += (char)key;
+                    }
+                    key = GetCharPressed();
+                }
+                if(IsKeyPressed(KEY_BACKSPACE) && authPassword.length() > 0) {
+                    authPassword.pop_back();
+                }
+                if(IsKeyPressed(KEY_TAB) && authMode == REGISTER) {
+                    typingPassword = false;
+                    typingEmail = true;
+                } else if(IsKeyPressed(KEY_ENTER)) {
+                    typingPassword = false;
+                }
+            }
+            
+            fieldY += fieldSpacing;
+            
+            // Email field (only for registration)
+            if(authMode == REGISTER) {
+                DrawTextCustom("Email:", fieldX, fieldY - 25, 18, TEXT_WHITE);
+                Rectangle emailField = {fieldX, fieldY, fieldWidth, fieldHeight};
+                DrawRectangleRounded(emailField, 0.1f, 8, typingEmail ? METAL_ACCENT : METAL_BG);
+                DrawRectangleLinesEx(emailField, 2, typingEmail ? BUTTON_BLUE : METAL_ACCENT);
+                DrawTextCustom(authEmail.c_str(), fieldX + 15, fieldY + 13, 18, TEXT_WHITE);
+                
+                if(CheckCollisionPointRec(GetMousePosition(), emailField) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    typingUsername = false;
+                    typingPassword = false;
+                    typingEmail = true;
+                }
+                
+                if(typingEmail) {
+                    int key = GetCharPressed();
+                    while(key > 0) {
+                        if(key >= 32 && key <= 125 && authEmail.length() < 50) {
+                            authEmail += (char)key;
+                        }
+                        key = GetCharPressed();
+                    }
+                    if(IsKeyPressed(KEY_BACKSPACE) && authEmail.length() > 0) {
+                        authEmail.pop_back();
+                    }
+                    if(IsKeyPressed(KEY_ENTER)) {
+                        typingEmail = false;
+                    }
+                }
+                
+                fieldY += fieldSpacing;
+            }
+            
+            // Error/success message
+            if(!authMessage.empty()) {
+                DrawTextCustom(authMessage.c_str(), fieldX, fieldY, 16, authMessageColor);
+                fieldY += 30;
+            }
+            
+            // Submit button
+            Rectangle btnSubmit = {modal.x + modal.width - 170, modal.y + modalHeight - 60, 140, 45};
+            const char* submitText = authMode == LOGIN ? "Entrar" : "Registar";
+            if(DrawButton(submitText, btnSubmit, SUCCESS_GREEN)) {
+                if(authMode == LOGIN) {
+                    // Login logic
+                    if(authUsername.empty() || authPassword.empty()) {
+                        authMessage = "Preencha todos os campos!";
+                        authMessageColor = BUTTON_RED;
+                    } else {
+                        User* user = FindUser(users, authUsername);
+                        std::string passHash = SimpleHash(authPassword);
+                        
+                        if(user && user->passwordHash == passHash) {
+                            currentUser = user;
+                            currentUsername = user->username;
+                            isLoggedIn = true;
+                            showLoginPrompt = false;
+                            authUsername = "";
+                            authPassword = "";
+                            authMessage = "";
+                            toastMessage = "Login bem-sucedido!";
+                            toastTimer = 2.0f;
+                        } else {
+                            authMessage = "Utilizador ou password incorretos!";
+                            authMessageColor = BUTTON_RED;
+                        }
+                    }
+                } else {
+                    // Register logic
+                    if(authUsername.empty() || authPassword.empty() || authEmail.empty()) {
+                        authMessage = "Preencha todos os campos!";
+                        authMessageColor = BUTTON_RED;
+                    } else if(FindUser(users, authUsername) != nullptr) {
+                        authMessage = "Utilizador ja existe!";
+                        authMessageColor = BUTTON_RED;
+                    } else {
+                        // Create new user
+                        User newUser;
+                        newUser.id = users.empty() ? 1 : users.back().id + 1;
+                        newUser.username = authUsername;
+                        newUser.passwordHash = SimpleHash(authPassword);
+                        newUser.email = authEmail;
+                        users.push_back(newUser);
+                        SaveUsers(users);
+                        
+                        authMessage = "Conta criada! Faca login.";
+                        authMessageColor = SUCCESS_GREEN;
+                        authMode = LOGIN;
+                        authPassword = "";
+                        authEmail = "";
+                    }
+                }
+            }
+            
+            // Toggle mode button
+            Rectangle btnToggleMode = {modal.x + 30, modal.y + modalHeight - 60, 200, 45};
+            const char* toggleText = authMode == LOGIN ? "Criar nova conta" : "Ja tenho conta";
+            if(DrawButton(toggleText, btnToggleMode, METAL_ACCENT)) {
+                authMode = (authMode == LOGIN) ? REGISTER : LOGIN;
+                authMessage = "";
+                authPassword = "";
+                authEmail = "";
+                typingUsername = false;
+                typingPassword = false;
+                typingEmail = false;
+            }
+        }
+        
+        // USER PROFILE DROPDOWN
+        if(showUserProfile && isLoggedIn && currentUser != nullptr) {
+            // Position dropdown below user button
+            float dropdownX = screenWidth - 330;
+            float dropdownY = 70;
+            float dropdownWidth = 280;
+            float dropdownHeight = 240;
+            
+            Rectangle dropdown = {dropdownX, dropdownY, dropdownWidth, dropdownHeight};
+            
+            // Shadow
+            DrawRectangle(dropdown.x + 4, dropdown.y + 4, dropdown.width, dropdown.height, Fade(SHADOW_COLOR, 0.5f));
+            
+            // Background
+            DrawRectangleRounded(dropdown, 0.05f, 8, METAL_PANEL);
+            DrawRectangleLinesEx(dropdown, 2, BUTTON_BLUE);
+            
+            float itemY = dropdown.y + 15;
+            
+            // Username header
+            DrawTextWithShadow(currentUsername.c_str(), dropdown.x + 15, itemY, 22, TEXT_WHITE);
+            itemY += 35;
+            
+            // Separator
+            DrawRectangle(dropdown.x + 10, itemY, dropdown.width - 20, 2, METAL_ACCENT);
+            itemY += 15;
+            
+            // Wishlist count
+            char wishlistText[64];
+            snprintf(wishlistText, sizeof(wishlistText), "Lista de Desejos (%d)", (int)currentUser->wishlist.size());
+            Rectangle wishlistBtn = {dropdown.x + 10, itemY, dropdown.width - 20, 40};
+            bool wishlistHover = CheckCollisionPointRec(GetMousePosition(), wishlistBtn);
+            DrawRectangleRounded(wishlistBtn, 0.1f, 6, wishlistHover ? METAL_ACCENT : METAL_BG);
+            DrawTextCustom(wishlistText, dropdown.x + 20, itemY + 11, 18, TEXT_WHITE);
+            
+            if(wishlistHover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                showWishlist = true;
+                showUserProfile = false;
+            }
+            itemY += 50;
+            
+            // Order history
+            char ordersText[64];
+            snprintf(ordersText, sizeof(ordersText), "Historico de Pedidos (%d)", (int)currentUser->orderHistory.size());
+            Rectangle ordersBtn = {dropdown.x + 10, itemY, dropdown.width - 20, 40};
+            bool ordersHover = CheckCollisionPointRec(GetMousePosition(), ordersBtn);
+            DrawRectangleRounded(ordersBtn, 0.1f, 6, ordersHover ? METAL_ACCENT : METAL_BG);
+            DrawTextCustom(ordersText, dropdown.x + 20, itemY + 11, 18, TEXT_WHITE);
+            
+            if(ordersHover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                showOrderHistory = true;
+                showUserProfile = false;
+            }
+            itemY += 50;
+            
+            // Separator
+            DrawRectangle(dropdown.x + 10, itemY, dropdown.width - 20, 2, METAL_ACCENT);
+            itemY += 15;
+            
+            // Logout button
+            Rectangle logoutBtn = {dropdown.x + 10, itemY, dropdown.width - 20, 40};
+            bool logoutHover = CheckCollisionPointRec(GetMousePosition(), logoutBtn);
+            DrawRectangleRounded(logoutBtn, 0.1f, 6, logoutHover ? BUTTON_RED : METAL_BG);
+            DrawTextCustom("Terminar Sessao", dropdown.x + 20, itemY + 11, 18, logoutHover ? TEXT_WHITE : BUTTON_RED);
+            
+            if(logoutHover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                currentUser = nullptr;
+                currentUsername = "";
+                isLoggedIn = false;
+                showUserProfile = false;
+                toastMessage = "Sessao terminada!";
+                toastTimer = 2.0f;
+            }
+            
+            // Close dropdown when clicking outside
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !CheckCollisionPointRec(GetMousePosition(), dropdown)) {
+                showUserProfile = false;
+            }
+        }
+        
+        // WISHLIST MODAL
+        if(showWishlist && isLoggedIn && currentUser != nullptr) {
+            // Dark overlay
+            DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.75f));
+            
+            // Modal window
+            float modalWidth = 900;
+            float modalHeight = 650;
+            Rectangle modal = {(float)screenWidth/2 - modalWidth/2, (float)screenHeight/2 - modalHeight/2, modalWidth, modalHeight};
+            
+            DrawRectangle(modal.x + 4, modal.y + 4, modal.width, modal.height, Fade(SHADOW_COLOR, 0.5f));
+            DrawRectangleRounded(modal, 0.03f, 8, METAL_PANEL);
+            DrawRectangleLinesEx(modal, 3, BUTTON_BLUE);
+            
+            // Close button
+            Rectangle btnClose = {modal.x + modal.width - 45, modal.y + 10, 35, 35};
+            if(DrawButton("X", btnClose, BUTTON_RED)) {
+                showWishlist = false;
+            }
+            
+            // Title
+            char titleBuf[64];
+            snprintf(titleBuf, sizeof(titleBuf), "Lista de Desejos (%d itens)", (int)currentUser->wishlist.size());
+            DrawTextWithShadow(titleBuf, modal.x + 30, modal.y + 25, 32, TEXT_WHITE);
+            
+            // Wishlist items
+            float itemY = modal.y + 85;
+            float itemHeight = 120;
+            int displayedItems = 0;
+            
+            if(currentUser->wishlist.empty()) {
+                DrawTextCustom("A sua lista de desejos esta vazia!", modal.x + modalWidth/2 - 150, modal.y + modalHeight/2 - 20, 20, TEXT_GRAY);
+                DrawTextCustom("Adicione produtos clicando no coracao @ nas fichas dos produtos.", modal.x + 150, modal.y + modalHeight/2 + 10, 16, TEXT_GRAY);
+            } else {
+                for(size_t wi = 0; wi < currentUser->wishlist.size() && displayedItems < 4; wi++) {
+                    int productId = currentUser->wishlist[wi];
+                    
+                    // Find product
+                    auto it = std::find_if(products.begin(), products.end(), [productId](const Product& p) {
+                        return p.id == productId;
+                    });
+                    
+                    if(it == products.end()) continue; // Product not found
+                    
+                    const Product& p = *it;
+                    displayedItems++;
+                    
+                    // Item card
+                    Rectangle itemCard = {modal.x + 30, itemY, modalWidth - 60, itemHeight};
+                    bool itemHover = CheckCollisionPointRec(GetMousePosition(), itemCard);
+                    DrawRectangleRounded(itemCard, 0.05f, 8, itemHover ? CARD_HOVER : METAL_BG);
+                    DrawRectangleLinesEx(itemCard, 2, itemHover ? BUTTON_BLUE : METAL_ACCENT);
+                    
+                    // Product image
+                    Texture2D img = GetProductImage(p.imagePath);
+                    Rectangle imgRect = {itemCard.x + 15, itemCard.y + 10, 100, 100};
+                    DrawTexturePro(img, 
+                                  {0, 0, (float)img.width, (float)img.height},
+                                  imgRect,
+                                  {0, 0}, 0, WHITE);
+                    DrawRectangleLinesEx(imgRect, 1, METAL_ACCENT);
+                    
+                    // Product info
+                    float infoX = itemCard.x + 130;
+                    float infoY = itemCard.y + 15;
+                    
+                    DrawTextWithShadow(p.name.c_str(), infoX, infoY, 22, TEXT_WHITE);
+                    infoY += 30;
+                    
+                    DrawTextCustom(p.desc.c_str(), infoX, infoY, 16, TEXT_GRAY);
+                    infoY += 25;
+                    
+                    // Price
+                    char priceBuf[32];
+                    float displayPrice = p.price;
+                    if(p.isOnDiscount && p.discountPercent > 0) {
+                        displayPrice = p.price * (1.0f - p.discountPercent / 100.0f);
+                    }
+                    snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", displayPrice);
+                    DrawTextWithShadow(priceBuf, infoX, infoY, 24, GOLD);
+                    
+                    // Stock status
+                    const char* stockText = p.inStock ? "Em Stock" : "ESGOTADO";
+                    Color stockColor = p.inStock ? SUCCESS_GREEN : BUTTON_RED;
+                    DrawTextCustom(stockText, infoX + 150, infoY + 3, 18, stockColor);
+                    
+                    // Remove from wishlist button
+                    Rectangle btnRemove = {itemCard.x + itemCard.width - 170, itemCard.y + 15, 150, 40};
+                    if(DrawButton("Remover", btnRemove, BUTTON_RED)) {
+                        currentUser->wishlist.erase(
+                            std::remove(currentUser->wishlist.begin(), currentUser->wishlist.end(), productId),
+                            currentUser->wishlist.end()
+                        );
+                        SaveUsers(users);
+                        toastMessage = "Removido da lista de desejos!";
+                        toastTimer = 2.0f;
+                    }
+                    
+                    // Add to cart button (if in stock)
+                    if(p.inStock) {
+                        Rectangle btnAddCart = {itemCard.x + itemCard.width - 170, itemCard.y + 65, 150, 40};
+                        if(DrawButton("Adicionar ao Carrinho", btnAddCart, SUCCESS_GREEN)) {
+                            auto cartIt = std::find_if(cart.begin(), cart.end(), [&p](const CartItem& item) {
+                                return item.product.id == p.id;
+                            });
+                            if(cartIt != cart.end()) {
+                                cartIt->qty += 1;
+                                toastMessage = "Quantidade atualizada!";
+                            } else {
+                                cart.push_back({p, 1});
+                                toastMessage = "Adicionado ao carrinho!";
+                            }
+                            toastTimer = 2.0f;
+                        }
+                    }
+                    
+                    itemY += itemHeight + 10;
+                }
+                
+                // Show message if there are more items
+                if(currentUser->wishlist.size() > 4) {
+                    char moreBuf[64];
+                    snprintf(moreBuf, sizeof(moreBuf), "+ %d itens adicionais", (int)(currentUser->wishlist.size() - 4));
+                    DrawTextCustom(moreBuf, modal.x + modalWidth/2 - 80, itemY, 18, TEXT_GRAY);
+                }
+            }
+        }
+        
+        // CHECKOUT MODAL
+        if(showCheckout && isLoggedIn && currentUser != nullptr && !cart.empty()) {
+            // Dark overlay
+            DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.75f));
+            
+            static std::string shippingName = "";
+            static std::string shippingAddress = "";
+            static std::string shippingCity = "";
+            static std::string shippingPostal = "";
+            static std::string shippingPhone = "";
+            static int selectedPayment = 0; // 0=MB Way, 1=Card, 2=PayPal
+            static int activeField = 0; // Which field is being typed in
+            static std::string checkoutMessage = "";
+            static Color checkoutMessageColor = BUTTON_RED;
+            
+            // Modal window
+            float modalWidth = 700;
+            float modalHeight = 650;
+            Rectangle modal = {(float)screenWidth/2 - modalWidth/2, (float)screenHeight/2 - modalHeight/2, modalWidth, modalHeight};
+            
+            DrawRectangle(modal.x + 4, modal.y + 4, modal.width, modal.height, Fade(SHADOW_COLOR, 0.5f));
+            DrawRectangleRounded(modal, 0.03f, 8, METAL_PANEL);
+            DrawRectangleLinesEx(modal, 3, BUTTON_BLUE);
+            
+            // Close button
+            Rectangle btnClose = {modal.x + modal.width - 45, modal.y + 10, 35, 35};
+            if(DrawButton("X", btnClose, BUTTON_RED)) {
+                showCheckout = false;
+                checkoutMessage = "";
+            }
+            
+            // Title
+            DrawTextWithShadow("Finalizar Compra", modal.x + 30, modal.y + 25, 32, TEXT_WHITE);
+            
+            // Calculate total
+            float total = 0.0f;
+            for(const auto& item : cart) {
+                float price = item.product.price;
+                if(item.product.isOnDiscount && item.product.discountPercent > 0) {
+                    price *= (1.0f - item.product.discountPercent / 100.0f);
+                }
+                total += price * item.qty;
+            }
+            
+            char totalBuf[64];
+            snprintf(totalBuf, sizeof(totalBuf), "Total: EUR %.2f", total);
+            DrawTextWithShadow(totalBuf, modal.x + modalWidth - 220, modal.y + 30, 24, GOLD);
+            
+            float fieldY = modal.y + 85;
+            float fieldHeight = 45;
+            float fieldSpacing = 65;
+            
+            // Shipping form
+            DrawTextCustom("Dados de Envio:", modal.x + 30, fieldY, 20, TEXT_WHITE);
+            fieldY += 35;
+            
+            // Name field
+            Rectangle nameField = {modal.x + 30, fieldY, modalWidth - 60, fieldHeight};
+            DrawInputField(nameField, "Nome Completo", shippingName, activeField == 0, 50);
+            if(CheckCollisionPointRec(GetMousePosition(), nameField) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                activeField = 0;
+            }
+            if(activeField == 0) {
+                int key = GetCharPressed();
+                while(key > 0) {
+                    if((key >= 32 && key <= 125) || (key >= 128 && key <= 255)) {
+                        if(shippingName.length() < 50) shippingName += (char)key;
+                    }
+                    key = GetCharPressed();
+                }
+                if(IsKeyPressed(KEY_BACKSPACE) && shippingName.length() > 0) {
+                    shippingName.pop_back();
+                }
+                if(IsKeyPressed(KEY_TAB)) activeField = 1;
+            }
+            fieldY += fieldSpacing;
+            
+            // Address field
+            Rectangle addressField = {modal.x + 30, fieldY, modalWidth - 60, fieldHeight};
+            DrawInputField(addressField, "Morada", shippingAddress, activeField == 1, 80);
+            if(CheckCollisionPointRec(GetMousePosition(), addressField) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                activeField = 1;
+            }
+            if(activeField == 1) {
+                int key = GetCharPressed();
+                while(key > 0) {
+                    if((key >= 32 && key <= 125) || (key >= 128 && key <= 255)) {
+                        if(shippingAddress.length() < 80) shippingAddress += (char)key;
+                    }
+                    key = GetCharPressed();
+                }
+                if(IsKeyPressed(KEY_BACKSPACE) && shippingAddress.length() > 0) {
+                    shippingAddress.pop_back();
+                }
+                if(IsKeyPressed(KEY_TAB)) activeField = 2;
+            }
+            fieldY += fieldSpacing;
+            
+            // City and Postal in same row
+            Rectangle cityField = {modal.x + 30, fieldY, (modalWidth - 80) / 2, fieldHeight};
+            DrawInputField(cityField, "Cidade", shippingCity, activeField == 2, 30);
+            if(CheckCollisionPointRec(GetMousePosition(), cityField) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                activeField = 2;
+            }
+            if(activeField == 2) {
+                int key = GetCharPressed();
+                while(key > 0) {
+                    if((key >= 32 && key <= 125) || (key >= 128 && key <= 255)) {
+                        if(shippingCity.length() < 30) shippingCity += (char)key;
+                    }
+                    key = GetCharPressed();
+                }
+                if(IsKeyPressed(KEY_BACKSPACE) && shippingCity.length() > 0) {
+                    shippingCity.pop_back();
+                }
+                if(IsKeyPressed(KEY_TAB)) activeField = 3;
+            }
+            
+            Rectangle postalField = {modal.x + 30 + (modalWidth - 80) / 2 + 20, fieldY, (modalWidth - 80) / 2, fieldHeight};
+            DrawInputField(postalField, "Codigo Postal", shippingPostal, activeField == 3, 15);
+            if(CheckCollisionPointRec(GetMousePosition(), postalField) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                activeField = 3;
+            }
+            if(activeField == 3) {
+                int key = GetCharPressed();
+                while(key > 0) {
+                    if(key >= '0' && key <= '9' && shippingPostal.length() < 15) {
+                        shippingPostal += (char)key;
+                    } else if(key == '-' && shippingPostal.length() < 15) {
+                        shippingPostal += (char)key;
+                    }
+                    key = GetCharPressed();
+                }
+                if(IsKeyPressed(KEY_BACKSPACE) && shippingPostal.length() > 0) {
+                    shippingPostal.pop_back();
+                }
+                if(IsKeyPressed(KEY_TAB)) activeField = 4;
+            }
+            fieldY += fieldSpacing;
+            
+            // Phone field
+            Rectangle phoneField = {modal.x + 30, fieldY, modalWidth - 60, fieldHeight};
+            DrawInputField(phoneField, "Telefone", shippingPhone, activeField == 4, 20);
+            if(CheckCollisionPointRec(GetMousePosition(), phoneField) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                activeField = 4;
+            }
+            if(activeField == 4) {
+                int key = GetCharPressed();
+                while(key > 0) {
+                    if((key >= '0' && key <= '9') || key == '+' || key == ' ') {
+                        if(shippingPhone.length() < 20) shippingPhone += (char)key;
+                    }
+                    key = GetCharPressed();
+                }
+                if(IsKeyPressed(KEY_BACKSPACE) && shippingPhone.length() > 0) {
+                    shippingPhone.pop_back();
+                }
+            }
+            fieldY += fieldSpacing + 10;
+            
+            // Payment method selection
+            DrawTextCustom("Metodo de Pagamento:", modal.x + 30, fieldY, 20, TEXT_WHITE);
+            fieldY += 35;
+            
+            const char* paymentMethods[] = {"MB Way", "Cartao de Credito", "PayPal"};
+            for(int pm = 0; pm < 3; pm++) {
+                Rectangle pmBtn = {modal.x + 30 + pm * 210.0f, fieldY, 200, 40};
+                Color pmColor = (selectedPayment == pm) ? SUCCESS_GREEN : METAL_ACCENT;
+                bool pmHover = CheckCollisionPointRec(GetMousePosition(), pmBtn);
+                if(pmHover) pmColor = ColorBrightness(pmColor, 0.2f);
+                
+                DrawRectangleRounded(pmBtn, 0.1f, 6, pmColor);
+                int textW = MeasureTextCustom(paymentMethods[pm], 18);
+                DrawTextCustom(paymentMethods[pm], pmBtn.x + (pmBtn.width - textW) / 2, pmBtn.y + 11, 18, TEXT_WHITE);
+                
+                if(pmHover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    selectedPayment = pm;
+                }
+            }
+            fieldY += 60;
+            
+            // Error/success message
+            if(!checkoutMessage.empty()) {
+                DrawTextCustom(checkoutMessage.c_str(), modal.x + 30, fieldY, 16, checkoutMessageColor);
+                fieldY += 30;
+            }
+            
+            // Confirm order button
+            Rectangle btnConfirm = {modal.x + modalWidth - 220, modal.y + modalHeight - 60, 190, 45};
+            if(DrawButton("Confirmar Pedido", btnConfirm, SUCCESS_GREEN)) {
+                // Validate fields
+                if(shippingName.empty() || shippingAddress.empty() || shippingCity.empty() || 
+                   shippingPostal.empty() || shippingPhone.empty()) {
+                    checkoutMessage = "Preencha todos os campos!";
+                    checkoutMessageColor = BUTTON_RED;
+                } else {
+                    // Create order
+                    Order newOrder;
+                    newOrder.id = orders.empty() ? 1 : orders.back().id + 1;
+                    newOrder.username = currentUsername;
+                    newOrder.total = total;
+                    newOrder.status = OrderStatus::PENDING;
+                    
+                    // Get current date/time
+                    time_t now = time(0);
+                    tm* ltm = localtime(&now);
+                    std::stringstream dateStream;
+                    dateStream << std::setfill('0') 
+                              << std::setw(4) << (1900 + ltm->tm_year) << "-"
+                              << std::setw(2) << (1 + ltm->tm_mon) << "-"
+                              << std::setw(2) << ltm->tm_mday;
+                    newOrder.date = dateStream.str();
+                    
+                    newOrder.shippingAddress = shippingName + ", " + shippingAddress + ", " + 
+                                               shippingCity + ", " + shippingPostal + ", " + shippingPhone;
+                    newOrder.paymentMethod = paymentMethods[selectedPayment];
+                    
+                    // Add order items (simplified - in production would store items properly)
+                    for(const auto& item : cart) {
+                        OrderItem oi;
+                        oi.product = item.product;
+                        oi.qty = item.qty;
+                        oi.priceAtPurchase = item.product.price;
+                        if(item.product.isOnDiscount && item.product.discountPercent > 0) {
+                            oi.priceAtPurchase *= (1.0f - item.product.discountPercent / 100.0f);
+                        }
+                        newOrder.items.push_back(oi);
+                    }
+                    
+                    orders.push_back(newOrder);
+                    currentUser->orderHistory.push_back(newOrder.id);
+                    
+                    SaveOrders(orders);
+                    SaveUsers(users);
+                    
+                    // Clear cart and close modals
+                    cart.clear();
+                    showCheckout = false;
+                    toastMessage = "Pedido realizado com sucesso!";
+                    toastTimer = 3.0f;
+                    
+                    // Reset form
+                    shippingName = "";
+                    shippingAddress = "";
+                    shippingCity = "";
+                    shippingPostal = "";
+                    shippingPhone = "";
+                    selectedPayment = 0;
+                    activeField = 0;
+                    checkoutMessage = "";
+                }
+            }
+            
+            // Cancel button
+            Rectangle btnCancel = {modal.x + 30, modal.y + modalHeight - 60, 140, 45};
+            if(DrawButton("Cancelar", btnCancel, BUTTON_RED)) {
+                showCheckout = false;
+                checkoutMessage = "";
+            }
+        }
+        
+        // ORDER HISTORY MODAL
+        if(showOrderHistory && isLoggedIn && currentUser != nullptr) {
+            // Dark overlay
+            DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.75f));
+            
+            // Modal window
+            float modalWidth = 950;
+            float modalHeight = 700;
+            Rectangle modal = {(float)screenWidth/2 - modalWidth/2, (float)screenHeight/2 - modalHeight/2, modalWidth, modalHeight};
+            
+            DrawRectangle(modal.x + 4, modal.y + 4, modal.width, modal.height, Fade(SHADOW_COLOR, 0.5f));
+            DrawRectangleRounded(modal, 0.03f, 8, METAL_PANEL);
+            DrawRectangleLinesEx(modal, 3, BUTTON_BLUE);
+            
+            // Close button
+            Rectangle btnClose = {modal.x + modal.width - 45, modal.y + 10, 35, 35};
+            if(DrawButton("X", btnClose, BUTTON_RED)) {
+                showOrderHistory = false;
+            }
+            
+            // Title
+            char titleBuf[64];
+            snprintf(titleBuf, sizeof(titleBuf), "Historico de Pedidos (%d)", (int)currentUser->orderHistory.size());
+            DrawTextWithShadow(titleBuf, modal.x + 30, modal.y + 25, 32, TEXT_WHITE);
+            
+            // Order items
+            float itemY = modal.y + 85;
+            float itemHeight = 160;
+            int displayedOrders = 0;
+            
+            if(currentUser->orderHistory.empty()) {
+                DrawTextCustom("Nao tem pedidos no historico.", modal.x + modalWidth/2 - 150, modal.y + modalHeight/2 - 20, 20, TEXT_GRAY);
+                DrawTextCustom("Faca compras para ver os seus pedidos aqui.", modal.x + modalWidth/2 - 200, modal.y + modalHeight/2 + 10, 16, TEXT_GRAY);
+            } else {
+                // Show orders in reverse (newest first)
+                for(int oi = currentUser->orderHistory.size() - 1; oi >= 0 && displayedOrders < 3; oi--) {
+                    int orderId = currentUser->orderHistory[oi];
+                    
+                    // Find order
+                    auto it = std::find_if(orders.begin(), orders.end(), [orderId](const Order& o) {
+                        return o.id == orderId;
+                    });
+                    
+                    if(it == orders.end()) continue; // Order not found
+                    
+                    const Order& order = *it;
+                    displayedOrders++;
+                    
+                    // Order card
+                    Rectangle orderCard = {modal.x + 30, itemY, modalWidth - 60, itemHeight};
+                    bool orderHover = CheckCollisionPointRec(GetMousePosition(), orderCard);
+                    DrawRectangleRounded(orderCard, 0.05f, 8, orderHover ? CARD_HOVER : METAL_BG);
+                    DrawRectangleLinesEx(orderCard, 2, orderHover ? BUTTON_BLUE : METAL_ACCENT);
+                    
+                    // Order info
+                    float infoX = orderCard.x + 20;
+                    float infoY = orderCard.y + 15;
+                    
+                    // Order number and date
+                    char orderNumBuf[64];
+                    snprintf(orderNumBuf, sizeof(orderNumBuf), "Pedido #%d", order.id);
+                    DrawTextWithShadow(orderNumBuf, infoX, infoY, 24, TEXT_WHITE);
+                    
+                    DrawTextCustom(order.date.c_str(), infoX + 150, infoY + 5, 18, TEXT_GRAY);
+                    infoY += 35;
+                    
+                    // Status badge
+                    std::string statusText = OrderStatusToString(order.status);
+                    Color statusColor;
+                    switch(order.status) {
+                        case OrderStatus::PENDING: statusColor = GOLD; break;
+                        case OrderStatus::PROCESSING: statusColor = BUTTON_BLUE; break;
+                        case OrderStatus::SHIPPED: statusColor = PURPLE; break;
+                        case OrderStatus::DELIVERED: statusColor = SUCCESS_GREEN; break;
+                        case OrderStatus::CANCELLED: statusColor = BUTTON_RED; break;
+                        default: statusColor = METAL_ACCENT;
+                    }
+                    
+                    int statusW = MeasureTextCustom(statusText.c_str(), 16);
+                    Rectangle statusBadge = {infoX, infoY, (float)statusW + 20, 28};
+                    DrawRectangleRounded(statusBadge, 0.3f, 6, Fade(statusColor, 0.3f));
+                    DrawTextCustom(statusText.c_str(), statusBadge.x + 10, statusBadge.y + 6, 16, statusColor);
+                    infoY += 40;
+                    
+                    // Items summary
+                    DrawTextCustom("Itens:", infoX, infoY, 18, TEXT_WHITE);
+                    infoY += 25;
+                    
+                    int itemsShown = 0;
+                    for(const auto& item : order.items) {
+                        if(itemsShown >= 2) {
+                            char moreBuf[32];
+                            snprintf(moreBuf, sizeof(moreBuf), "+ %d itens adicionais", (int)(order.items.size() - 2));
+                            DrawTextCustom(moreBuf, infoX + 20, infoY, 14, TEXT_GRAY);
+                            break;
+                        }
+                        
+                        char itemBuf[128];
+                        snprintf(itemBuf, sizeof(itemBuf), "  • %s x%d", item.product.name.c_str(), item.qty);
+                        DrawTextCustom(itemBuf, infoX + 20, infoY, 14, TEXT_GRAY);
+                        infoY += 20;
+                        itemsShown++;
+                    }
+                    infoY = orderCard.y + 15;
+                    
+                    // Total (right side)
+                    char totalBuf[32];
+                    snprintf(totalBuf, sizeof(totalBuf), "EUR %.2f", order.total);
+                    int totalW = MeasureTextCustom(totalBuf, 28);
+                    DrawTextWithShadow(totalBuf, orderCard.x + orderCard.width - totalW - 20, infoY, 28, GOLD);
+                    
+                    // Payment method
+                    DrawTextCustom(order.paymentMethod.c_str(), orderCard.x + orderCard.width - 200, infoY + 45, 16, TEXT_GRAY);
+                    
+                    // Shipping address
+                    DrawTextCustom("Envio:", orderCard.x + orderCard.width - 350, infoY + 75, 14, TEXT_GRAY);
+                    
+                    // Word wrap shipping address
+                    std::string addr = order.shippingAddress;
+                    if(addr.length() > 50) {
+                        addr = addr.substr(0, 47) + "...";
+                    }
+                    DrawTextCustom(addr.c_str(), orderCard.x + orderCard.width - 350, infoY + 95, 13, TEXT_GRAY);
+                    
+                    itemY += itemHeight + 15;
+                }
+                
+                // Show message if there are more orders
+                if(currentUser->orderHistory.size() > 3) {
+                    char moreBuf[64];
+                    snprintf(moreBuf, sizeof(moreBuf), "+ %d pedidos adicionais", (int)(currentUser->orderHistory.size() - 3));
+                    DrawTextCustom(moreBuf, modal.x + modalWidth/2 - 100, itemY, 18, TEXT_GRAY);
+                }
+            }
         }
         
         // Product Details Modal
@@ -2042,6 +3089,160 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                 DrawTextCustom(line.c_str(), infoX, infoY, 16, TEXT_GRAY);
                 infoY += lineHeight;
                 pos = endPos;
+            }
+            
+            // Reviews section (at bottom of modal, above add to cart button)
+            float reviewsY = modal.y + modal.height - 250;
+            DrawLine(modal.x + 20, reviewsY - 10, modal.x + modal.width - 20, reviewsY - 10, METAL_ACCENT);
+            
+            DrawTextWithShadow("Avaliacoes", modal.x + 30, reviewsY, 22, TEXT_WHITE);
+            reviewsY += 35;
+            
+            // Get reviews for this product
+            std::vector<Review> productReviews;
+            for(const auto& r : reviews) {
+                if(r.productId == p.id) {
+                    productReviews.push_back(r);
+                }
+            }
+            
+            if(productReviews.empty()) {
+                DrawTextCustom("Sem avaliacoes ainda. Seja o primeiro!", modal.x + 40, reviewsY, 16, TEXT_GRAY);
+            } else {
+                // Show latest review only (to save space)
+                const Review& latestReview = productReviews.back();
+                
+                Rectangle reviewCard = {modal.x + 30, reviewsY, modal.width - 360, 80};
+                DrawRectangleRounded(reviewCard, 0.05f, 6, METAL_BG);
+                DrawRectangleLinesEx(reviewCard, 1, METAL_ACCENT);
+                
+                // Username and rating
+                DrawTextCustom(latestReview.username.c_str(), reviewCard.x + 15, reviewCard.y + 10, 16, TEXT_WHITE);
+                
+                // Stars
+                for(int s = 0; s < 5; s++) {
+                    Color starColor = (s < (int)latestReview.rating) ? GOLD : METAL_ACCENT;
+                    DrawTextCustom("*", reviewCard.x + 15 + s * 18, reviewCard.y + 30, 20, starColor);
+                }
+                
+                DrawTextCustom(latestReview.date.c_str(), reviewCard.x + 15, reviewCard.y + 55, 13, TEXT_GRAY);
+                
+                // Comment (truncated if too long)
+                std::string comment = latestReview.comment;
+                if(comment.length() > 40) {
+                    comment = comment.substr(0, 37) + "...";
+                }
+                DrawTextCustom(comment.c_str(), reviewCard.x + 150, reviewCard.y + 35, 15, TEXT_GRAY);
+                
+                // Show count if more reviews
+                if(productReviews.size() > 1) {
+                    char moreBuf[32];
+                    snprintf(moreBuf, sizeof(moreBuf), "+ %d mais", (int)(productReviews.size() - 1));
+                    DrawTextCustom(moreBuf, reviewCard.x + reviewCard.width - 80, reviewCard.y + 10, 14, BUTTON_BLUE);
+                }
+            }
+            
+            // Add review form (only if logged in)
+            if(isLoggedIn && currentUser != nullptr) {
+                static int newReviewRating = 5;
+                static std::string newReviewComment = "";
+                static bool typingReview = false;
+                
+                float formX = modal.x + modal.width - 300;
+                float formY = reviewsY;
+                
+                DrawTextCustom("Sua Avaliacao:", formX, formY, 16, TEXT_WHITE);
+                formY += 25;
+                
+                // Star rating selector
+                for(int s = 0; s < 5; s++) {
+                    Rectangle starBtn = {formX + s * 35.0f, formY, 30, 30};
+                    bool starHover = CheckCollisionPointRec(GetMousePosition(), starBtn);
+                    Color starColor = (s < newReviewRating) ? GOLD : METAL_ACCENT;
+                    if(starHover) starColor = ColorBrightness(starColor, 0.3f);
+                    
+                    DrawTextCustom("*", starBtn.x, starBtn.y, 28, starColor);
+                    
+                    if(starHover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        newReviewRating = s + 1;
+                    }
+                }
+                formY += 40;
+                
+                // Comment box
+                Rectangle commentBox = {formX, formY, 260, 60};
+                DrawRectangleRounded(commentBox, 0.1f, 6, typingReview ? METAL_ACCENT : METAL_BG);
+                DrawRectangleLinesEx(commentBox, 2, typingReview ? BUTTON_BLUE : METAL_ACCENT);
+                
+                BeginScissorMode(commentBox.x + 5, commentBox.y + 5, commentBox.width - 10, commentBox.height - 10);
+                DrawTextCustom(newReviewComment.c_str(), commentBox.x + 10, commentBox.y + 10, 14, TEXT_WHITE);
+                EndScissorMode();
+                
+                if(CheckCollisionPointRec(GetMousePosition(), commentBox) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    typingReview = true;
+                }
+                
+                if(typingReview) {
+                    int key = GetCharPressed();
+                    while(key > 0) {
+                        if((key >= 32 && key <= 125) || (key >= 128 && key <= 255)) {
+                            if(newReviewComment.length() < 200) newReviewComment += (char)key;
+                        }
+                        key = GetCharPressed();
+                    }
+                    if(IsKeyPressed(KEY_BACKSPACE) && newReviewComment.length() > 0) {
+                        newReviewComment.pop_back();
+                    }
+                }
+                formY += 70;
+                
+                // Submit review button
+                Rectangle btnSubmitReview = {formX, formY, 130, 35};
+                if(DrawButton("Enviar", btnSubmitReview, SUCCESS_GREEN)) {
+                    if(newReviewComment.empty()) {
+                        toastMessage = "Escreva um comentario!";
+                        toastTimer = 2.0f;
+                    } else {
+                        // Create new review
+                        Review newReview;
+                        newReview.id = reviews.empty() ? 1 : reviews.back().id + 1;
+                        newReview.productId = p.id;
+                        newReview.username = currentUsername;
+                        newReview.rating = newReviewRating;
+                        newReview.comment = newReviewComment;
+                        
+                        // Get current date
+                        time_t now = time(0);
+                        tm* ltm = localtime(&now);
+                        std::stringstream dateStream;
+                        dateStream << std::setfill('0') 
+                                  << std::setw(4) << (1900 + ltm->tm_year) << "-"
+                                  << std::setw(2) << (1 + ltm->tm_mon) << "-"
+                                  << std::setw(2) << ltm->tm_mday;
+                        newReview.date = dateStream.str();
+                        
+                        reviews.push_back(newReview);
+                        SaveReviews(reviews);
+                        
+                        // Update product average rating
+                        float totalRating = 0.0f;
+                        int count = 0;
+                        for(const auto& r : reviews) {
+                            if(r.productId == p.id) {
+                                totalRating += r.rating;
+                                count++;
+                            }
+                        }
+                        products[selectedProductForDetails].rating = count > 0 ? totalRating / count : 0.0f;
+                        SaveProducts(products);
+                        
+                        toastMessage = "Avaliacao enviada!";
+                        toastTimer = 2.0f;
+                        newReviewComment = "";
+                        newReviewRating = 5;
+                        typingReview = false;
+                    }
+                }
             }
             
             // Add to cart button (if in stock)
@@ -2357,3 +3558,319 @@ bool RunLoginUI(int screenWidth, int screenHeight) {
     }
     return logged;
 }
+
+// === USER MANAGEMENT ===
+namespace techcore {
+
+std::string SimpleHash(const std::string& password) {
+    // Simple hash for demo purposes (NOT secure for production!)
+    unsigned long hash = 5381;
+    for (char c : password) {
+        hash = ((hash << 5) + hash) + c;
+    }
+    return std::to_string(hash);
+}
+
+std::vector<techcore::User> LoadUsers() {
+    std::vector<techcore::User> users;
+    std::ifstream file("users.txt");
+    if(file.is_open()) {
+        std::string line;
+        while(std::getline(file, line)) {
+            if(line.empty()) continue; // Skip empty lines
+            
+            try {
+                techcore::User u;
+                size_t pos = 0;
+                
+                // Parse ID
+                size_t nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue; // Invalid line
+                std::string idStr = line.substr(pos, nextPos - pos);
+                if(idStr.empty()) continue;
+                u.id = std::stoi(idStr);
+                pos = nextPos + 1;
+                
+                // Parse username
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                u.username = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse password hash
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                u.passwordHash = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse email
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                u.email = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse wishlist (comma-separated IDs)
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                std::string wishlistStr = line.substr(pos, nextPos - pos);
+                if(!wishlistStr.empty() && wishlistStr != "none") {
+                    size_t wPos = 0;
+                    while(wPos < wishlistStr.length()) {
+                        size_t comma = wishlistStr.find(',', wPos);
+                        if(comma == std::string::npos) comma = wishlistStr.length();
+                        std::string numStr = wishlistStr.substr(wPos, comma - wPos);
+                        if(!numStr.empty()) {
+                            u.wishlist.push_back(std::stoi(numStr));
+                        }
+                        wPos = comma + 1;
+                    }
+                }
+                pos = nextPos + 1;
+                
+                // Parse order history (comma-separated IDs)
+                if(pos < line.length()) {
+                    std::string ordersStr = line.substr(pos);
+                    if(!ordersStr.empty() && ordersStr != "none") {
+                        size_t oPos = 0;
+                        while(oPos < ordersStr.length()) {
+                            size_t comma = ordersStr.find(',', oPos);
+                            if(comma == std::string::npos) comma = ordersStr.length();
+                            std::string numStr = ordersStr.substr(oPos, comma - oPos);
+                            if(!numStr.empty()) {
+                                u.orderHistory.push_back(std::stoi(numStr));
+                            }
+                            oPos = comma + 1;
+                        }
+                    }
+                }
+                
+                users.push_back(u);
+            } catch(const std::exception& e) {
+                // Skip malformed lines
+                continue;
+            }
+        }
+        file.close();
+    }
+    return users;
+}
+
+void SaveUsers(const std::vector<techcore::User>& users) {
+    std::ofstream file("users.txt");
+    if(file.is_open()) {
+        for(const auto& u : users) {
+            file << u.id << "|" << u.username << "|" << u.passwordHash << "|" << u.email << "|";
+            
+            // Wishlist
+            if(u.wishlist.empty()) {
+                file << "none";
+            } else {
+                for(size_t i = 0; i < u.wishlist.size(); i++) {
+                    file << u.wishlist[i];
+                    if(i < u.wishlist.size() - 1) file << ",";
+                }
+            }
+            file << "|";
+            
+            // Order history
+            if(u.orderHistory.empty()) {
+                file << "none";
+            } else {
+                for(size_t i = 0; i < u.orderHistory.size(); i++) {
+                    file << u.orderHistory[i];
+                    if(i < u.orderHistory.size() - 1) file << ",";
+                }
+            }
+            file << "\n";
+        }
+        file.close();
+    }
+}
+
+techcore::User* FindUser(std::vector<techcore::User>& users, const std::string& username) {
+    for(auto& u : users) {
+        if(u.username == username) return &u;
+    }
+    return nullptr;
+}
+
+// === ORDER MANAGEMENT ===
+
+std::string OrderStatusToString(techcore::OrderStatus status) {
+    switch(status) {
+        case techcore::OrderStatus::PENDING: return "Pendente";
+        case techcore::OrderStatus::PROCESSING: return "Processando";
+        case techcore::OrderStatus::SHIPPED: return "Enviado";
+        case techcore::OrderStatus::DELIVERED: return "Entregue";
+        case techcore::OrderStatus::CANCELLED: return "Cancelado";
+        default: return "Desconhecido";
+    }
+}
+
+techcore::OrderStatus StringToOrderStatus(const std::string& str) {
+    if(str == "Pendente") return techcore::OrderStatus::PENDING;
+    if(str == "Processando") return techcore::OrderStatus::PROCESSING;
+    if(str == "Enviado") return techcore::OrderStatus::SHIPPED;
+    if(str == "Entregue") return techcore::OrderStatus::DELIVERED;
+    if(str == "Cancelado") return techcore::OrderStatus::CANCELLED;
+    return techcore::OrderStatus::PENDING;
+}
+
+std::vector<techcore::Order> LoadOrders() {
+    std::vector<techcore::Order> orders;
+    std::ifstream file("orders.txt");
+    if(file.is_open()) {
+        std::string line;
+        while(std::getline(file, line)) {
+            if(line.empty()) continue; // Skip empty lines
+            
+            try {
+                techcore::Order o;
+                size_t pos = 0;
+                
+                // Parse ID
+                size_t nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                std::string idStr = line.substr(pos, nextPos - pos);
+                if(idStr.empty()) continue;
+                o.id = std::stoi(idStr);
+                pos = nextPos + 1;
+                
+                // Parse username
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                o.username = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse total
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                std::string totalStr = line.substr(pos, nextPos - pos);
+                if(totalStr.empty()) continue;
+                o.total = std::stof(totalStr);
+                pos = nextPos + 1;
+                
+                // Parse status
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                o.status = StringToOrderStatus(line.substr(pos, nextPos - pos));
+                pos = nextPos + 1;
+                
+                // Parse date
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                o.date = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse shipping address
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                o.shippingAddress = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse payment method
+                nextPos = line.find('|', pos);
+                o.paymentMethod = line.substr(pos, nextPos - pos);
+                
+                // Note: OrderItems are complex, storing count for now
+                // In production, would store item details separately
+                
+                orders.push_back(o);
+            } catch(const std::exception& e) {
+                // Skip malformed lines
+                continue;
+            }
+        }
+        file.close();
+    }
+    return orders;
+}
+
+void SaveOrders(const std::vector<techcore::Order>& orders) {
+    std::ofstream file("orders.txt");
+    if(file.is_open()) {
+        for(const auto& o : orders) {
+            file << o.id << "|" << o.username << "|" << o.total << "|" 
+                 << OrderStatusToString(o.status) << "|" << o.date << "|" 
+                 << o.shippingAddress << "|" << o.paymentMethod << "\n";
+        }
+        file.close();
+    }
+}
+
+// === REVIEW MANAGEMENT ===
+
+std::vector<techcore::Review> LoadReviews() {
+    std::vector<techcore::Review> reviews;
+    std::ifstream file("reviews.txt");
+    if(file.is_open()) {
+        std::string line;
+        while(std::getline(file, line)) {
+            if(line.empty()) continue; // Skip empty lines
+            
+            try {
+                techcore::Review r;
+                size_t pos = 0;
+                
+                // Parse ID
+                size_t nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                std::string idStr = line.substr(pos, nextPos - pos);
+                if(idStr.empty()) continue;
+                r.id = std::stoi(idStr);
+                pos = nextPos + 1;
+                
+                // Parse product ID
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                std::string pidStr = line.substr(pos, nextPos - pos);
+                if(pidStr.empty()) continue;
+                r.productId = std::stoi(pidStr);
+                pos = nextPos + 1;
+                
+                // Parse username
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                r.username = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse rating
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                std::string ratingStr = line.substr(pos, nextPos - pos);
+                if(ratingStr.empty()) continue;
+                r.rating = std::stof(ratingStr);
+                pos = nextPos + 1;
+                
+                // Parse comment
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue;
+                r.comment = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse date
+                r.date = line.substr(pos);
+                
+                reviews.push_back(r);
+            } catch(const std::exception& e) {
+                // Skip malformed lines
+                continue;
+            }
+        }
+        file.close();
+    }
+    return reviews;
+}
+
+void SaveReviews(const std::vector<techcore::Review>& reviews) {
+    std::ofstream file("reviews.txt");
+    if(file.is_open()) {
+        for(const auto& r : reviews) {
+            file << r.id << "|" << r.productId << "|" << r.username << "|" 
+                 << r.rating << "|" << r.comment << "|" << r.date << "\n";
+        }
+        file.close();
+    }
+}
+
+} // end namespace techcore for user/order/review management
