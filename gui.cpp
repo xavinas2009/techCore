@@ -210,7 +210,6 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
     
     // Title with modern typography
     DrawTextCustom("TechCore", 150, 20, 32, METAL_HIGHLIGHT);
-    DrawTextCustom("Componentes Premium", 150, 50, 14, METAL_BRONZE);
 
     // Admin button (only if logged in)
     if(isLoggedIn) {
