@@ -1,3 +1,4 @@
+
 1|AMD Ryzen 5 5600X|6-Core/12-Thread, 3.7GHz Base, 4.6GHz Boost|199.99|255,161,0|CPU|thumbnails/cpu.png|0|0|0|3.8
 2|AMD Ryzen 7 5800X|8-Core/16-Thread, 3.8GHz Base, 4.7GHz Boost|349.99|255,161,0|CPU|thumbnails/cpu.png|1|0|0|4.4
 3|AMD Ryzen 9 5950X|16-Core/32-Thread, 3.4GHz Base, 4.9GHz Boost|549.99|255,161,0|CPU|thumbnails/cpu.png|1|0|0|4.2
@@ -41,34 +42,34 @@
 41|G.Skill Ripjaws V 32GB DDR4|2x16GB 3600MHz CL16|119.99|0,158,47|RAM|thumbnails/ram.png|1|0|0|4.5
 42|Crucial Ballistix 16GB DDR4|2x8GB 3600MHz CL16|74.99|0,158,47|RAM|thumbnails/ram.png|0|0|0|4.6
 43|TeamGroup T-Force 32GB DDR5|2x16GB 6000MHz CL38|159.99|0,158,47|RAM|thumbnails/ram.png|0|0|0|4.7
-44|Samsung 980 Pro 1TB|NVMe Gen4, 7000MB/s Read|149.99|0,82,172|Storage|thumbnails/storage.png|0|0|0|4.8
-45|Samsung 980 Pro 2TB|NVMe Gen4, 7000MB/s Read|279.99|0,82,172|Storage|thumbnails/storage.png|0|0|0|3.3
-46|WD Black SN850X 1TB|NVMe Gen4, 7300MB/s Read|139.99|0,82,172|Storage|thumbnails/storage.png|1|0|0|4.1
-47|WD Black SN850X 2TB|NVMe Gen4, 7300MB/s Read|269.99|0,82,172|Storage|thumbnails/storage.png|0|0|0|4.8
-48|Crucial P5 Plus 1TB|NVMe Gen4, 6600MB/s Read|119.99|0,82,172|Storage|thumbnails/storage.png|0|0|0|4.5
-49|Crucial P5 Plus 2TB|NVMe Gen4, 6600MB/s Read|229.99|0,82,172|Storage|thumbnails/storage.png|1|0|0|3.9
-50|Samsung 870 EVO 500GB|SATA III, 560MB/s Read|59.99|135,206,235|Storage|thumbnails/storage.png|1|1|11|4.8
-51|Samsung 870 EVO 1TB|SATA III, 560MB/s Read|99.99|135,206,235|Storage|thumbnails/storage.png|0|0|0|4.8
-52|Crucial MX500 1TB|SATA III, 560MB/s Read|89.99|135,206,235|Storage|thumbnails/storage.png|0|1|40|4.6
-53|WD Blue 1TB|SATA III, 560MB/s Read|79.99|135,206,235|Storage|thumbnails/storage.png|1|1|23|4.4
-54|Samsung 990 Pro 2TB|NVMe Gen4, 7450MB/s Read|299.99|0,82,172|Storage|thumbnails/storage.png|1|0|0|4.7
-55|Seagate FireCuda 530 2TB|NVMe Gen4, 7300MB/s Read|289.99|0,82,172|Storage|thumbnails/storage.png|1|1|28|4.2
-56|Kingston KC3000 1TB|NVMe Gen4, 7000MB/s Read|129.99|0,82,172|Storage|thumbnails/storage.png|1|0|0|4.6
-57|WD Black SN770 1TB|NVMe Gen4, 5150MB/s Read|99.99|0,82,172|Storage|thumbnails/storage.png|1|0|0|3.5
-58|Crucial P3 Plus 2TB|NVMe Gen4, 5000MB/s Read|159.99|0,82,172|Storage|thumbnails/storage.png|0|0|0|4.5
-59|ASUS ROG Strix B550-F|AM4, ATX, PCIe 4.0|189.99|128,0,0|Motherboard|thumbnails/motherboard.png|1|0|0|3.5
-60|MSI MAG B550 TOMAHAWK|AM4, ATX, PCIe 4.0|179.99|128,0,0|Motherboard|thumbnails/motherboard.png|1|0|0|4.4
-61|Gigabyte X570 AORUS Elite|AM4, ATX, PCIe 4.0|229.99|128,0,0|Motherboard|thumbnails/motherboard.png|0|1|11|4.3
-62|ASUS TUF Gaming B650-PLUS|AM5, ATX, DDR5, PCIe 5.0|219.99|128,0,0|Motherboard|thumbnails/motherboard.png|1|1|18|3.9
-63|MSI MPG X670E Carbon|AM5, ATX, DDR5, PCIe 5.0|449.99|128,0,0|Motherboard|thumbnails/motherboard.png|1|1|10|4.3
-64|ASUS Prime Z690-P|LGA1700, ATX, DDR5, PCIe 5.0|249.99|200,16,255|Motherboard|thumbnails/motherboard.png|1|0|0|4.7
-65|MSI MAG Z690 TOMAHAWK|LGA1700, ATX, DDR5, PCIe 5.0|279.99|200,16,255|Motherboard|thumbnails/motherboard.png|1|1|12|4.7
-66|Gigabyte Z690 AORUS Elite|LGA1700, ATX, DDR5, PCIe 5.0|299.99|200,16,255|Motherboard|thumbnails/motherboard.png|1|0|0|4.5
-67|ASUS ROG Strix Z790-E|LGA1700, ATX, DDR5, PCIe 5.0|469.99|200,16,255|Motherboard|thumbnails/motherboard.png|1|1|12|3.7
-68|ASRock B550M Steel Legend|AM4, Micro-ATX, PCIe 4.0|139.99|128,0,0|Motherboard|thumbnails/motherboard.png|1|0|0|4.1
-69|MSI PRO B650-P|AM5, ATX, DDR5, PCIe 4.0|189.99|128,0,0|Motherboard|thumbnails/motherboard.png|1|0|0|3.6
-70|Gigabyte B760M DS3H|LGA1700, Micro-ATX, DDR5|129.99|200,16,255|Motherboard|thumbnails/motherboard.png|1|1|12|4.6
-71|ASUS Prime B550M-A|AM4, Micro-ATX, PCIe 4.0|119.99|128,0,0|Motherboard|thumbnails/motherboard.png|0|0|0|4.7
+44|Samsung 980 Pro 1TB|NVMe Gen4, 7000MB/s Read|149.99|0,82,172|Storage|thumbnails/storage_nvme.png|0|0|0|4.8
+45|Samsung 980 Pro 2TB|NVMe Gen4, 7000MB/s Read|279.99|0,82,172|Storage|thumbnails/storage_nvme.png|0|0|0|3.3
+46|WD Black SN850X 1TB|NVMe Gen4, 7300MB/s Read|139.99|0,82,172|Storage|thumbnails/storage_nvme.png|1|0|0|4.1
+47|WD Black SN850X 2TB|NVMe Gen4, 7300MB/s Read|269.99|0,82,172|Storage|thumbnails/storage_nvme.png|0|0|0|4.8
+48|Crucial P5 Plus 1TB|NVMe Gen4, 6600MB/s Read|119.99|0,82,172|Storage|thumbnails/storage_nvme.png|0|0|0|4.5
+49|Crucial P5 Plus 2TB|NVMe Gen4, 6600MB/s Read|229.99|0,82,172|Storage|thumbnails/storage_nvme.png|1|0|0|3.9
+50|Samsung 870 EVO 500GB|SATA III, 560MB/s Read|59.99|135,206,235|Storage|thumbnails/storage_sata.png|1|1|11|4.8
+51|Samsung 870 EVO 1TB|SATA III, 560MB/s Read|99.99|135,206,235|Storage|thumbnails/storage_sata.png|0|0|0|4.8
+52|Crucial MX500 1TB|SATA III, 560MB/s Read|89.99|135,206,235|Storage|thumbnails/storage_sata.png|0|1|40|4.6
+53|WD Blue 1TB|SATA III, 560MB/s Read|79.99|135,206,235|Storage|thumbnails/storage_sata.png|1|1|23|4.4
+54|Samsung 990 Pro 2TB|NVMe Gen4, 7450MB/s Read|299.99|0,82,172|Storage|thumbnails/storage_nvme.png|1|0|0|4.7
+55|Seagate FireCuda 530 2TB|NVMe Gen4, 7300MB/s Read|289.99|0,82,172|Storage|thumbnails/storage_nvme.png|1|1|28|4.2
+56|Kingston KC3000 1TB|NVMe Gen4, 7000MB/s Read|129.99|0,82,172|Storage|thumbnails/storage_nvme.png|1|0|0|4.6
+57|WD Black SN770 1TB|NVMe Gen4, 5150MB/s Read|99.99|0,82,172|Storage|thumbnails/storage_nvme.png|1|0|0|3.5
+58|Crucial P3 Plus 2TB|NVMe Gen4, 5000MB/s Read|159.99|0,82,172|Storage|thumbnails/storage_nvme.png|0|0|0|4.5
+59|ASUS ROG Strix B550-F|AM4, ATX, PCIe 4.0|189.99|128,0,0|Motherboard|thumbnails/mobo_amd.png|1|0|0|3.5
+60|MSI MAG B550 TOMAHAWK|AM4, ATX, PCIe 4.0|179.99|128,0,0|Motherboard|thumbnails/mobo_amd.png|1|0|0|4.4
+61|Gigabyte X570 AORUS Elite|AM4, ATX, PCIe 4.0|229.99|128,0,0|Motherboard|thumbnails/mobo_amd.png|0|1|11|4.3
+62|ASUS TUF Gaming B650-PLUS|AM5, ATX, DDR5, PCIe 5.0|219.99|128,0,0|Motherboard|thumbnails/mobo_amd.png|1|1|18|3.9
+63|MSI MPG X670E Carbon|AM5, ATX, DDR5, PCIe 5.0|449.99|128,0,0|Motherboard|thumbnails/mobo_amd.png|1|1|10|4.3
+64|ASUS Prime Z690-P|LGA1700, ATX, DDR5, PCIe 5.0|249.99|200,16,255|Motherboard|thumbnails/mobo_intel.png|1|0|0|4.7
+65|MSI MAG Z690 TOMAHAWK|LGA1700, ATX, DDR5, PCIe 5.0|279.99|200,16,255|Motherboard|thumbnails/mobo_intel.png|1|1|12|4.7
+66|Gigabyte Z690 AORUS Elite|LGA1700, ATX, DDR5, PCIe 5.0|299.99|200,16,255|Motherboard|thumbnails/mobo_intel.png|1|0|0|4.5
+67|ASUS ROG Strix Z790-E|LGA1700, ATX, DDR5, PCIe 5.0|469.99|200,16,255|Motherboard|thumbnails/mobo_intel.png|1|1|12|3.7
+68|ASRock B550M Steel Legend|AM4, Micro-ATX, PCIe 4.0|139.99|128,0,0|Motherboard|thumbnails/mobo_amd.png|1|0|0|4.1
+69|MSI PRO B650-P|AM5, ATX, DDR5, PCIe 4.0|189.99|128,0,0|Motherboard|thumbnails/mobo_amd.png|1|0|0|3.6
+70|Gigabyte B760M DS3H|LGA1700, Micro-ATX, DDR5|129.99|200,16,255|Motherboard|thumbnails/mobo_intel.png|1|1|12|4.6
+71|ASUS Prime B550M-A|AM4, Micro-ATX, PCIe 4.0|119.99|128,0,0|Motherboard|thumbnails/mobo_amd.png|0|0|0|4.7
 72|Corsair RM750x|750W 80+ Gold Modular|119.99|255,203,0|PSU|thumbnails/psu.png|1|0|0|4.3
 73|Corsair RM850x|850W 80+ Gold Modular|139.99|255,203,0|PSU|thumbnails/psu.png|0|0|0|4.1
 74|EVGA SuperNOVA 750 G6|750W 80+ Gold Modular|109.99|255,203,0|PSU|thumbnails/psu.png|0|0|0|3.8
