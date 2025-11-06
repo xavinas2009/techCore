@@ -172,83 +172,45 @@ ProductCategory StringToCategory(const std::string& str) {
 }
 
 std::vector<Product> defaultProducts() {
-    return {
-        // CPUs - AMD
-        {1, "AMD Ryzen 5 5600X", "6-Core/12-Thread, 3.7GHz Base, 4.6GHz Boost", 199.99f, ORANGE, ProductCategory::CPU, "thumbnails/cpu_amd.png"},
-        {2, "AMD Ryzen 7 5800X", "8-Core/16-Thread, 3.8GHz Base, 4.7GHz Boost", 349.99f, ORANGE, ProductCategory::CPU, "thumbnails/cpu_amd.png"},
-        {3, "AMD Ryzen 9 5950X", "16-Core/32-Thread, 3.4GHz Base, 4.9GHz Boost", 549.99f, ORANGE, ProductCategory::CPU, "thumbnails/cpu_amd.png"},
-        
-        // CPUs - Intel
-        {4, "Intel Core i5-12600K", "10-Core (6P+4E), Up to 4.9GHz", 279.99f, BLUE, ProductCategory::CPU, "thumbnails/cpu_intel.png"},
-        {5, "Intel Core i7-12700K", "12-Core (8P+4E), Up to 5.0GHz", 389.99f, BLUE, ProductCategory::CPU, "thumbnails/cpu_intel.png"},
-        {6, "Intel Core i9-12900K", "16-Core (8P+8E), Up to 5.2GHz", 589.99f, BLUE, ProductCategory::CPU, "thumbnails/cpu_intel.png"},
-        
-        // GPUs - NVIDIA
-        {7, "NVIDIA RTX 3060", "12GB GDDR6, 3584 CUDA Cores", 329.99f, GREEN, ProductCategory::GPU, "thumbnails/gpu_nvidia.png"},
-        {8, "NVIDIA RTX 3070", "8GB GDDR6, 5888 CUDA Cores", 499.99f, GREEN, ProductCategory::GPU, "thumbnails/gpu_nvidia.png"},
-        {9, "NVIDIA RTX 4090", "24GB GDDR6X, 16384 CUDA Cores", 1599.99f, GREEN, ProductCategory::GPU, "thumbnails/gpu_nvidia.png"},
-        
-        // GPUs - AMD
-        {10, "AMD RX 6700 XT", "12GB GDDR6, 2560 Stream Processors", 449.99f, RED, ProductCategory::GPU, "thumbnails/gpu_amd.png"},
-        {11, "AMD RX 6900 XT", "16GB GDDR6, 5120 Stream Processors", 999.99f, RED, ProductCategory::GPU, "thumbnails/gpu_amd.png"},
-        {12, "AMD RX 7900 XTX", "24GB GDDR6, 6144 Stream Processors", 999.99f, RED, ProductCategory::GPU, "thumbnails/gpu_amd.png"},
-        
-        // RAM
-        {13, "Corsair Vengeance 16GB DDR4", "2x8GB 3200MHz CL16", 79.99f, LIME, ProductCategory::RAM, "thumbnails/ram.png"},
-        {14, "Corsair Vengeance 32GB DDR4", "2x16GB 3600MHz CL18", 129.99f, LIME, ProductCategory::RAM, "thumbnails/ram.png"},
-        {15, "G.Skill Trident Z5 64GB DDR5", "2x32GB 6400MHz CL32", 329.99f, LIME, ProductCategory::RAM, "thumbnails/ram.png"},
-        
-        // Storage - NVMe
-        {16, "Samsung 980 Pro 1TB", "NVMe Gen4, 7000MB/s Read", 149.99f, DARKBLUE, ProductCategory::STORAGE, "thumbnails/storage_nvme.png"},
-        {17, "WD Black SN850X 2TB", "NVMe Gen4, 7300MB/s Read", 269.99f, DARKBLUE, ProductCategory::STORAGE, "thumbnails/storage_nvme.png"},
-        
-        // Storage - SATA
-        {18, "Samsung 870 EVO 1TB", "SATA III, 560MB/s Read", 99.99f, SKYBLUE, ProductCategory::STORAGE, "thumbnails/storage_sata.png"},
-        {19, "Crucial MX500 1TB", "SATA III, 560MB/s Read", 89.99f, SKYBLUE, ProductCategory::STORAGE, "thumbnails/storage_sata.png"},
-        
-        // Motherboards - AMD
-        {20, "ASUS ROG Strix B550-F", "AM4, ATX, PCIe 4.0", 189.99f, MAROON, ProductCategory::MOTHERBOARD, "thumbnails/mobo_amd.png"},
-        {21, "MSI MAG B550 TOMAHAWK", "AM4, ATX, PCIe 4.0", 179.99f, MAROON, ProductCategory::MOTHERBOARD, "thumbnails/mobo_amd.png"},
-        
-        // Motherboards - Intel
-        {22, "ASUS Prime Z690-P", "LGA1700, ATX, DDR5, PCIe 5.0", 249.99f, PURPLE, ProductCategory::MOTHERBOARD, "thumbnails/mobo_intel.png"},
-        {23, "MSI MAG Z690 TOMAHAWK", "LGA1700, ATX, DDR5, PCIe 5.0", 279.99f, PURPLE, ProductCategory::MOTHERBOARD, "thumbnails/mobo_intel.png"},
-        
-        // PSU
-        {24, "Corsair RM750x", "750W 80+ Gold Modular", 119.99f, GOLD, ProductCategory::PSU, "thumbnails/psu.png"},
-        {25, "EVGA SuperNOVA 850 G6", "850W 80+ Gold Modular", 129.99f, GOLD, ProductCategory::PSU, "thumbnails/psu.png"},
-        
-        // Cooling
-        {26, "Noctua NH-D15", "Dual Tower Air Cooler", 99.99f, BROWN, ProductCategory::COOLING, "thumbnails/cooling.png"},
-        {27, "Corsair H100i RGB", "240mm AIO Liquid Cooler", 119.99f, BROWN, ProductCategory::COOLING, "thumbnails/cooling.png"},
-        
-        // Cases
-        {28, "NZXT H510", "Mid Tower, Tempered Glass", 89.99f, DARKGRAY, ProductCategory::CASE, "thumbnails/case.png"},
-        {29, "Lian Li O11 Dynamic", "Mid Tower, Dual Chamber", 139.99f, DARKGRAY, ProductCategory::CASE, "thumbnails/case.png"},
-        
-        // Peripherals
-        {30, "Logitech G Pro Wireless", "Wireless Gaming Mouse", 129.99f, PINK, ProductCategory::PERIPHERAL, "thumbnails/peripheral.png"},
-        {31, "Corsair K70 RGB", "Mechanical Gaming Keyboard", 159.99f, PINK, ProductCategory::PERIPHERAL, "thumbnails/peripheral.png"},
-    };
+    // Return empty vector - products should be added via admin panel
+    return {};
 }
 
 void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highlightAdminBtn, bool isLoggedIn) {
+    // Load logo image (once)
+    static Texture2D logoImage = {0};
+    static bool logoLoaded = false;
+    if(!logoLoaded) {
+        if(FileExists("thumbnails/imagem.png")) {
+            Image img = LoadImage("thumbnails/imagem.png");
+            ImageResize(&img, 120, 64);
+            logoImage = LoadTextureFromImage(img);
+            UnloadImage(img);
+            logoLoaded = true;
+        }
+    }
+    
     // Header gradient background
     DrawRectangleGradientV(0, 0, screenW, 80, METAL_PANEL, METAL_BG);
     DrawRectangle(0, 80, screenW, 2, METAL_ACCENT);
     
     // Logo box with shadow and modern design
-    Rectangle logoBox{16.0f, 16.0f, 58.0f, 48.0f};
-    DrawRectangle(logoBox.x + 2, logoBox.y + 2, logoBox.width, logoBox.height, Fade(SHADOW_COLOR, 0.4f));
-    DrawRectangleRounded(logoBox, 0.15f, 8, BUTTON_BLUE);
-    DrawRectangleLinesEx(logoBox, 2.0f, BUTTON_BLUE_HOVER);
+    Rectangle logoBox{16.0f, 8.0f, 120.0f, 64.0f};
     
-    // Logo text
-    DrawTextCustom("TC", logoBox.x + 14, logoBox.y + 14, 24, TEXT_WHITE);
+    // Draw logo image if loaded, otherwise draw text
+    if(logoLoaded && logoImage.id > 0) {
+        DrawTexture(logoImage, logoBox.x, logoBox.y, WHITE);
+    } else {
+        DrawRectangle(logoBox.x + 2, logoBox.y + 2, logoBox.width, logoBox.height, Fade(SHADOW_COLOR, 0.4f));
+        DrawRectangleRounded(logoBox, 0.15f, 8, BUTTON_BLUE);
+        DrawRectangleLinesEx(logoBox, 2.0f, BUTTON_BLUE_HOVER);
+        // Logo text fallback
+        DrawTextCustom("TC", logoBox.x + 14, logoBox.y + 14, 24, TEXT_WHITE);
+    }
     
     // Title with modern typography
-    DrawTextCustom("TechCore", 88, 20, 32, METAL_HIGHLIGHT);
-    DrawTextCustom("Componentes Premium", 88, 50, 14, METAL_BRONZE);
+    DrawTextCustom("TechCore", 150, 20, 32, METAL_HIGHLIGHT);
+    DrawTextCustom("Componentes Premium", 150, 50, 14, METAL_BRONZE);
 
     // Admin button (only if logged in)
     if(isLoggedIn) {
@@ -325,6 +287,12 @@ void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& car
         for(size_t i=0; i<cart.size() && i<6; ++i){
             CartItem& item = cart[i];
             
+            // Calculate actual price (with discount if applicable)
+            float actualPrice = item.product.price;
+            if(item.product.isOnDiscount && item.product.discountPercent > 0) {
+                actualPrice = item.product.price * (1.0f - item.product.discountPercent / 100.0f);
+            }
+            
             // Item card
             Rectangle itemCard = {modal.x + 20, (float)y, modal.width - 40, 50};
             DrawRectangleRounded(itemCard, 0.1f, 8, i % 2 == 0 ? METAL_BG : Fade(METAL_BG, 0.5f));
@@ -334,6 +302,16 @@ void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& car
             
             // Product name - MAIOR E MAIS VISÍVEL
             DrawTextWithShadow(item.product.name.c_str(), itemCard.x + 15, itemCard.y + 6, 17, TEXT_WHITE);
+            
+            // Discount badge if applicable
+            if(item.product.isOnDiscount && item.product.discountPercent > 0) {
+                char discountText[16];
+                snprintf(discountText, sizeof(discountText), "-%0.f%%", item.product.discountPercent);
+                Rectangle discountBadge = {itemCard.x + itemCard.width - 65, itemCard.y + 6, 50, 18};
+                DrawRectangleRounded(discountBadge, 0.3f, 6, BUTTON_RED);
+                int discW = MeasureTextCustom(discountText, 12);
+                DrawTextCustom(discountText, discountBadge.x + (discountBadge.width - discW)/2, discountBadge.y + 3, 12, TEXT_WHITE);
+            }
             
             // Quantity controls
             Rectangle btnMinus = {itemCard.x + 15, itemCard.y + 28, 30, 18};
@@ -353,19 +331,24 @@ void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& car
                 item.qty++;
             }
             
-            // Unit price - MAIS VISÍVEL
+            // Unit price - MAIS VISÍVEL (show discounted price or original)
             char unitPrice[32];
-            snprintf(unitPrice, sizeof(unitPrice), "EUR %.2f/un", item.product.price);
+            if(item.product.isOnDiscount && item.product.discountPercent > 0) {
+                snprintf(unitPrice, sizeof(unitPrice), "EUR %.2f/un", actualPrice);
+            } else {
+                snprintf(unitPrice, sizeof(unitPrice), "EUR %.2f/un", item.product.price);
+            }
             DrawTextCustom(unitPrice, itemCard.x + 120, itemCard.y + 30, 14, TEXT_GRAY);
             
-            // Total price for this item - MAIOR E COM SOMBRA
+            // Total price for this item - MAIOR E COM SOMBRA (using discounted price)
             char priceBuf[32];
-            snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", item.product.price * item.qty);
+            snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", actualPrice * item.qty);
             int priceW = MeasureTextCustom(priceBuf, 20);
-            DrawTextWithShadow(priceBuf, itemCard.x + itemCard.width - priceW - 12, itemCard.y + 14, 20, GOLD);
+            Color priceColor = (item.product.isOnDiscount && item.product.discountPercent > 0) ? BUTTON_RED : GOLD;
+            DrawTextWithShadow(priceBuf, itemCard.x + itemCard.width - priceW - 12, itemCard.y + 14, 20, priceColor);
             
             y += 58;
-            total += item.product.price * item.qty;
+            total += actualPrice * item.qty;
         }
     }
 
@@ -432,7 +415,9 @@ void SaveProducts(const std::vector<Product>& products) {
             file << p.id << "|" << p.name << "|" << p.desc << "|" 
                  << p.price << "|" << (int)p.color.r << "," << (int)p.color.g 
                  << "," << (int)p.color.b << "|" << CategoryToString(p.category) 
-                 << "|" << p.imagePath << "\n";
+                 << "|" << p.imagePath << "|" << (p.inStock ? "1" : "0") 
+                 << "|" << (p.isOnDiscount ? "1" : "0") << "|" << p.discountPercent 
+                 << "|" << p.rating << "\n";
         }
         file.close();
     }
@@ -482,16 +467,73 @@ std::vector<Product> LoadProducts() {
             
             // Parse imagePath (optional - might not exist in old files)
             if(pos < line.length()) {
-                p.imagePath = line.substr(pos);
+                nextPos = line.find('|', pos);
+                if(nextPos != std::string::npos) {
+                    p.imagePath = line.substr(pos, nextPos - pos);
+                    pos = nextPos + 1;
+                    
+                    // Parse inStock (optional)
+                    nextPos = line.find('|', pos);
+                    if(nextPos != std::string::npos) {
+                        p.inStock = (line.substr(pos, nextPos - pos) == "1");
+                        pos = nextPos + 1;
+                        
+                        // Parse isOnDiscount (optional)
+                        nextPos = line.find('|', pos);
+                        if(nextPos != std::string::npos) {
+                            p.isOnDiscount = (line.substr(pos, nextPos - pos) == "1");
+                            pos = nextPos + 1;
+                            
+                            // Parse discountPercent (optional)
+                            nextPos = line.find('|', pos);
+                            if(nextPos != std::string::npos) {
+                                p.discountPercent = std::stof(line.substr(pos, nextPos - pos));
+                                pos = nextPos + 1;
+                                
+                                // Parse rating (optional)
+                                if(pos < line.length()) {
+                                    p.rating = std::stof(line.substr(pos));
+                                } else {
+                                    p.rating = 4.0f; // Default rating
+                                }
+                            } else if(pos < line.length()) {
+                                p.discountPercent = std::stof(line.substr(pos));
+                                p.rating = 4.0f; // Default rating
+                            } else {
+                                p.discountPercent = 0.0f;
+                                p.rating = 4.0f; // Default rating
+                            }
+                        } else {
+                            p.isOnDiscount = false;
+                            p.discountPercent = 0.0f;
+                            p.rating = 4.0f; // Default rating
+                        }
+                    } else {
+                        p.inStock = true;
+                        p.isOnDiscount = false;
+                        p.discountPercent = 0.0f;
+                        p.rating = 4.0f; // Default rating
+                    }
+                } else {
+                    p.imagePath = line.substr(pos);
+                    p.inStock = true;
+                    p.isOnDiscount = false;
+                    p.discountPercent = 0.0f;
+                    p.rating = 4.0f; // Default rating
+                }
             } else {
                 p.imagePath = "none";
+                p.inStock = true;
+                p.isOnDiscount = false;
+                p.discountPercent = 0.0f;
+                p.rating = 4.0f; // Default rating
             }
             
             products.push_back(p);
         }
         file.close();
     }
-    return products.empty() ? defaultProducts() : products;
+    return products;
 }
 
 // Admin Panel for CRUD operations
@@ -602,8 +644,23 @@ void ShowAdminPanel(int screenWidth, int screenHeight, std::vector<Product>& pro
         
         chipX += 80;
         
-        // Category buttons (compact)
-        for(int cat = 0; cat < 3; cat++) {
+        // First row of category buttons
+        for(int cat = 0; cat < 5; cat++) {
+            Rectangle chip = {chipX, chipY, 85, 36};
+            bool isActive = !showAllCategories && (int)adminFilterCategory == cat;
+            
+            if(DrawButton(categoryNames[cat], chip, isActive ? BUTTON_BLUE : METAL_ACCENT)) {
+                showAllCategories = false;
+                adminFilterCategory = (ProductCategory)cat;
+                adminScrollOffset = 0;
+            }
+            chipX += 95;
+        }
+        
+        // Second row of category buttons
+        chipX = modal.x + 20;
+        chipY += 46;
+        for(int cat = 5; cat < 9; cat++) {
             Rectangle chip = {chipX, chipY, 85, 36};
             bool isActive = !showAllCategories && (int)adminFilterCategory == cat;
             
@@ -616,8 +673,8 @@ void ShowAdminPanel(int screenWidth, int screenHeight, std::vector<Product>& pro
         }
     }
     
-    // Product list area - adjusted Y position
-    int listY = modal.y + 200;
+    // Product list area - adjusted Y position to accommodate two rows of filters
+    int listY = modal.y + 246;
     int itemHeight = 60;
     
     if(action == AdminAction::NONE) {
@@ -859,7 +916,7 @@ void ShowAdminPanel(int screenWidth, int screenHeight, std::vector<Product>& pro
                 std::string imgPath = editImagePath.empty() ? "none" : editImagePath;
                 if(action == AdminAction::CREATE) {
                     int newId = products.empty() ? 1 : products.back().id + 1;
-                    products.push_back({newId, editName, editDesc, price, colors[selectedColorIdx], selectedCategory, imgPath});
+                    products.push_back({newId, editName, editDesc, price, colors[selectedColorIdx], selectedCategory, imgPath, true, false, 0.0f, 4.0f});
                     message = "[OK] Produto criado!";
                     LogAction("CREATE", "Produto criado: " + editName + " (EUR " + editPrice + ")");
                 } else {
@@ -922,13 +979,50 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     std::string search;
     bool isSearchActive = false;
     bool showCart = false;
+    bool showProductDetails = false;
+    int selectedProductForDetails = -1;
     std::string cartMessage;
     std::string toastMessage = "";
     float toastTimer = 0.0f;
     bool showCategoryFilter = false; // Toggle for category dropdown
+    
+    // Filter sidebar state
+    bool filterStockExpanded = true;
+    bool filterManufacturerExpanded = true;
+    bool filterPriceExpanded = true;
+    bool filterStateExpanded = true;
+    bool filterBrandExpanded = false;
+    bool filterRatingExpanded = false;
+    bool filterShippingExpanded = false;
+    
+    // Filter selections
+    bool filterInStock = false;
+    bool filterOutOfStock = false;
+    bool filterAMD = false;
+    bool filterIntel = false;
+    bool filterNvidia = false;
+    float filterMinPrice = 0.0f;
+    float filterMaxPrice = 15000.0f;
+    bool filterNew = false;
+    bool filterPromotion = false;
+    bool filterHighlight = false;
+    // Brand filters
+    bool filterAsus = false;
+    bool filterMSI = false;
+    bool filterGigabyte = false;
+    bool filterCorsair = false;
+    // Rating filters
+    bool filter5Stars = false;
+    bool filter4Plus = false;
+    bool filter3Plus = false;
+    // Shipping filters
+    bool filterFreeShipping = false;
+    bool filterExpressShipping = false;
+    
     int cols = 2;
     float gutter = 18.f;
-    float cardW = (screenWidth - 80 - (cols-1)*gutter)/cols;
+    float filterSidebarWidth = 350.0f; // Width reserved for filter sidebar
+    float cardW = (screenWidth - filterSidebarWidth - 80 - (cols-1)*gutter)/cols;
     float cardH = 112.f;
     
     // Scroll variables
@@ -952,7 +1046,8 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         
         // Keyboard shortcuts
         if(IsKeyPressed(KEY_ESCAPE)) {
-            if(showCart) showCart = false;
+            if(showProductDetails) showProductDetails = false;
+            else if(showCart) showCart = false;
             else if(showAdmin) showAdmin = false;
             else if(isSearchActive) isSearchActive = false;
             else if(showCategoryFilter) showCategoryFilter = false;
@@ -963,7 +1058,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         
         // Close category filter when clicking outside
         if(showCategoryFilter && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            Rectangle dropdownArea = {40, 110, 500, 175};
+            Rectangle dropdownArea = {850, 110, 500, 175};
             if(!CheckCollisionPointRec(GetMousePosition(), dropdownArea)) {
                 showCategoryFilter = false;
             }
@@ -995,8 +1090,366 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             showAdmin = true;
         }
 
-        // Modern search bar with icon
-        Rectangle searchBar = {40, 110, 380, 40};
+        // ========== FILTER SIDEBAR WITH SCROLL ==========
+        float filterX = 10;
+        float filterY = 90;
+        float filterWidth = 320;
+        static float filterScrollOffset = 0.0f;
+        
+        // Filter scroll area
+        Rectangle filterScrollArea = {0, filterY, filterWidth + 20, (float)screenHeight - filterY};
+        BeginScissorMode(filterScrollArea.x, filterScrollArea.y, filterScrollArea.width, filterScrollArea.height);
+        
+        float filterItemY = filterY - filterScrollOffset;
+        
+        // Title
+        DrawTextCustom("FILTROS", filterX, filterItemY, 20, TEXT_WHITE);
+        filterItemY += 40;
+        
+        // Stock Filter
+        Rectangle stockHeader = {filterX, filterItemY, filterWidth, 40};
+        bool hoverStock = CheckCollisionPointRec(GetMousePosition(), stockHeader);
+        DrawRectangleRounded(stockHeader, 0.1f, 4, hoverStock ? METAL_ACCENT : METAL_PANEL);
+        DrawTextCustom("Stock", filterX + 10, filterItemY + 12, 18, TEXT_WHITE);
+        DrawTextCustom(filterStockExpanded ? "^" : "v", filterX + filterWidth - 25, filterItemY + 12, 18, METAL_HIGHLIGHT);
+        if(CheckCollisionPointRec(GetMousePosition(), stockHeader) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            filterStockExpanded = !filterStockExpanded;
+        }
+        filterItemY += 45;
+        
+        if(filterStockExpanded) {
+            Rectangle inStockBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(inStockBox, 2, METAL_ACCENT);
+            if(filterInStock) DrawRectangle(inStockBox.x + 4, inStockBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Em Stock", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterInStock = !filterInStock;
+            }
+            filterItemY += 30;
+            
+            Rectangle outStockBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(outStockBox, 2, METAL_ACCENT);
+            if(filterOutOfStock) DrawRectangle(outStockBox.x + 4, outStockBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Sem Stock", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterOutOfStock = !filterOutOfStock;
+            }
+            filterItemY += 35;
+        }
+        
+        // Manufacturer Filter
+        DrawRectangle(filterX, filterItemY, filterWidth, 1, METAL_ACCENT);
+        filterItemY += 10;
+        Rectangle manuHeader = {filterX, filterItemY, filterWidth, 40};
+        bool hoverManu = CheckCollisionPointRec(GetMousePosition(), manuHeader);
+        DrawRectangleRounded(manuHeader, 0.1f, 4, hoverManu ? METAL_ACCENT : METAL_PANEL);
+        DrawTextCustom("Fabricante", filterX + 10, filterItemY + 12, 18, TEXT_WHITE);
+        DrawTextCustom(filterManufacturerExpanded ? "^" : "v", filterX + filterWidth - 25, filterItemY + 12, 18, METAL_HIGHLIGHT);
+        if(CheckCollisionPointRec(GetMousePosition(), manuHeader) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            filterManufacturerExpanded = !filterManufacturerExpanded;
+        }
+        filterItemY += 45;
+        
+        if(filterManufacturerExpanded) {
+            Rectangle amdBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(amdBox, 2, METAL_ACCENT);
+            if(filterAMD) DrawRectangle(amdBox.x + 4, amdBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("AMD", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterAMD = !filterAMD;
+            }
+            filterItemY += 30;
+            
+            Rectangle intelBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(intelBox, 2, METAL_ACCENT);
+            if(filterIntel) DrawRectangle(intelBox.x + 4, intelBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Intel", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterIntel = !filterIntel;
+            }
+            filterItemY += 30;
+            
+            Rectangle nvidiaBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(nvidiaBox, 2, METAL_ACCENT);
+            if(filterNvidia) DrawRectangle(nvidiaBox.x + 4, nvidiaBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("NVIDIA", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterNvidia = !filterNvidia;
+            }
+            filterItemY += 35;
+        }
+        
+        // Price Filter
+        DrawRectangle(filterX, filterItemY, filterWidth, 1, METAL_ACCENT);
+        filterItemY += 10;
+        Rectangle priceHeader = {filterX, filterItemY, filterWidth, 40};
+        bool hoverPrice = CheckCollisionPointRec(GetMousePosition(), priceHeader);
+        DrawRectangleRounded(priceHeader, 0.1f, 4, hoverPrice ? METAL_ACCENT : METAL_PANEL);
+        DrawTextCustom("Preço", filterX + 10, filterItemY + 12, 18, TEXT_WHITE);
+        DrawTextCustom(filterPriceExpanded ? "^" : "v", filterX + filterWidth - 25, filterItemY + 12, 18, METAL_HIGHLIGHT);
+        if(CheckCollisionPointRec(GetMousePosition(), priceHeader) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            filterPriceExpanded = !filterPriceExpanded;
+        }
+        filterItemY += 45;
+        
+        if(filterPriceExpanded) {
+            char priceBuf[64];
+            snprintf(priceBuf, sizeof(priceBuf), "%.0f EUR - %.0f EUR", filterMinPrice, filterMaxPrice);
+            DrawTextCustom(priceBuf, filterX + 10, filterItemY, 16, GOLD);
+            filterItemY += 30;
+            
+            // Min price slider
+            Rectangle minSliderTrack = {filterX + 10, filterItemY, filterWidth - 20, 6};
+            DrawRectangleRounded(minSliderTrack, 0.5f, 4, METAL_ACCENT);
+            float minHandleX = filterX + 10 + (filterMinPrice / 15000.0f) * (filterWidth - 20);
+            Rectangle minHandle = {minHandleX - 8, filterItemY - 6, 16, 18};
+            bool hoverMinHandle = CheckCollisionPointRec(GetMousePosition(), minHandle);
+            DrawCircle(minHandleX, filterItemY + 3, 8, hoverMinHandle ? BUTTON_BLUE_HOVER : BUTTON_BLUE);
+            
+            // Drag min slider
+            static bool draggingMin = false;
+            if(CheckCollisionPointRec(GetMousePosition(), minHandle) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                draggingMin = true;
+            }
+            if(draggingMin && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                float mouseX = GetMousePosition().x;
+                float ratio = (mouseX - (filterX + 10)) / (filterWidth - 20);
+                if(ratio < 0) ratio = 0;
+                if(ratio > 1) ratio = 1;
+                filterMinPrice = ratio * 15000.0f;
+                if(filterMinPrice > filterMaxPrice - 100) filterMinPrice = filterMaxPrice - 100;
+            }
+            if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) draggingMin = false;
+            
+            filterItemY += 25;
+            
+            // Max price slider
+            Rectangle maxSliderTrack = {filterX + 10, filterItemY, filterWidth - 20, 6};
+            DrawRectangleRounded(maxSliderTrack, 0.5f, 4, METAL_ACCENT);
+            float maxHandleX = filterX + 10 + (filterMaxPrice / 15000.0f) * (filterWidth - 20);
+            Rectangle maxHandle = {maxHandleX - 8, filterItemY - 6, 16, 18};
+            bool hoverMaxHandle = CheckCollisionPointRec(GetMousePosition(), maxHandle);
+            DrawCircle(maxHandleX, filterItemY + 3, 8, hoverMaxHandle ? BUTTON_BLUE_HOVER : BUTTON_BLUE);
+            
+            // Drag max slider
+            static bool draggingMax = false;
+            if(CheckCollisionPointRec(GetMousePosition(), maxHandle) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                draggingMax = true;
+            }
+            if(draggingMax && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                float mouseX = GetMousePosition().x;
+                float ratio = (mouseX - (filterX + 10)) / (filterWidth - 20);
+                if(ratio < 0) ratio = 0;
+                if(ratio > 1) ratio = 1;
+                filterMaxPrice = ratio * 15000.0f;
+                if(filterMaxPrice < filterMinPrice + 100) filterMaxPrice = filterMinPrice + 100;
+            }
+            if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) draggingMax = false;
+            
+            filterItemY += 35;
+        }
+        
+        // Product State Filter
+        DrawRectangle(filterX, filterItemY, filterWidth, 1, METAL_ACCENT);
+        filterItemY += 10;
+        Rectangle stateHeader = {filterX, filterItemY, filterWidth, 40};
+        bool hoverState = CheckCollisionPointRec(GetMousePosition(), stateHeader);
+        DrawRectangleRounded(stateHeader, 0.1f, 4, hoverState ? METAL_ACCENT : METAL_PANEL);
+        DrawTextCustom("Estado do Produto", filterX + 10, filterItemY + 12, 18, TEXT_WHITE);
+        DrawTextCustom(filterStateExpanded ? "^" : "v", filterX + filterWidth - 25, filterItemY + 12, 18, METAL_HIGHLIGHT);
+        if(CheckCollisionPointRec(GetMousePosition(), stateHeader) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            filterStateExpanded = !filterStateExpanded;
+        }
+        filterItemY += 45;
+        
+        if(filterStateExpanded) {
+            Rectangle newBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(newBox, 2, METAL_ACCENT);
+            if(filterNew) DrawRectangle(newBox.x + 4, newBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Novos", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterNew = !filterNew;
+            }
+            filterItemY += 30;
+            
+            Rectangle promoBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(promoBox, 2, METAL_ACCENT);
+            if(filterPromotion) DrawRectangle(promoBox.x + 4, promoBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Promoções", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterPromotion = !filterPromotion;
+            }
+            filterItemY += 30;
+            
+            Rectangle highlightBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(highlightBox, 2, METAL_ACCENT);
+            if(filterHighlight) DrawRectangle(highlightBox.x + 4, highlightBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Destaques", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterHighlight = !filterHighlight;
+            }
+            filterItemY += 35;
+        }
+        
+        // Brand Filter (more specific than manufacturer)
+        DrawRectangle(filterX, filterItemY, filterWidth, 1, METAL_ACCENT);
+        filterItemY += 10;
+        Rectangle brandHeader = {filterX, filterItemY, filterWidth, 40};
+        bool hoverBrand = CheckCollisionPointRec(GetMousePosition(), brandHeader);
+        DrawRectangleRounded(brandHeader, 0.1f, 4, hoverBrand ? METAL_ACCENT : METAL_PANEL);
+        DrawTextCustom("Marca", filterX + 10, filterItemY + 12, 18, TEXT_WHITE);
+        DrawTextCustom(filterBrandExpanded ? "^" : "v", filterX + filterWidth - 25, filterItemY + 12, 18, METAL_HIGHLIGHT);
+        if(CheckCollisionPointRec(GetMousePosition(), brandHeader) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            filterBrandExpanded = !filterBrandExpanded;
+        }
+        filterItemY += 45;
+        
+        if(filterBrandExpanded) {
+            Rectangle asusBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(asusBox, 2, METAL_ACCENT);
+            if(filterAsus) DrawRectangle(asusBox.x + 4, asusBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("ASUS", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterAsus = !filterAsus;
+            }
+            filterItemY += 30;
+            
+            Rectangle msiBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(msiBox, 2, METAL_ACCENT);
+            if(filterMSI) DrawRectangle(msiBox.x + 4, msiBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("MSI", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterMSI = !filterMSI;
+            }
+            filterItemY += 30;
+            
+            Rectangle gigabyteBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(gigabyteBox, 2, METAL_ACCENT);
+            if(filterGigabyte) DrawRectangle(gigabyteBox.x + 4, gigabyteBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Gigabyte", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterGigabyte = !filterGigabyte;
+            }
+            filterItemY += 30;
+            
+            Rectangle corsairBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(corsairBox, 2, METAL_ACCENT);
+            if(filterCorsair) DrawRectangle(corsairBox.x + 4, corsairBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Corsair", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterCorsair = !filterCorsair;
+            }
+            filterItemY += 35;
+        }
+        
+        // Rating Filter
+        DrawRectangle(filterX, filterItemY, filterWidth, 1, METAL_ACCENT);
+        filterItemY += 10;
+        Rectangle ratingHeader = {filterX, filterItemY, filterWidth, 40};
+        bool hoverRating = CheckCollisionPointRec(GetMousePosition(), ratingHeader);
+        DrawRectangleRounded(ratingHeader, 0.1f, 4, hoverRating ? METAL_ACCENT : METAL_PANEL);
+        DrawTextCustom("Avaliação", filterX + 10, filterItemY + 12, 18, TEXT_WHITE);
+        DrawTextCustom(filterRatingExpanded ? "^" : "v", filterX + filterWidth - 25, filterItemY + 12, 18, METAL_HIGHLIGHT);
+        if(CheckCollisionPointRec(GetMousePosition(), ratingHeader) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            filterRatingExpanded = !filterRatingExpanded;
+        }
+        filterItemY += 45;
+        
+        if(filterRatingExpanded) {
+            Rectangle star5Box = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(star5Box, 2, METAL_ACCENT);
+            if(filter5Stars) DrawRectangle(star5Box.x + 4, star5Box.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("5 Estrelas", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filter5Stars = !filter5Stars;
+            }
+            filterItemY += 30;
+            
+            Rectangle star4Box = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(star4Box, 2, METAL_ACCENT);
+            if(filter4Plus) DrawRectangle(star4Box.x + 4, star4Box.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("4+ Estrelas", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filter4Plus = !filter4Plus;
+            }
+            filterItemY += 30;
+            
+            Rectangle star3Box = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(star3Box, 2, METAL_ACCENT);
+            if(filter3Plus) DrawRectangle(star3Box.x + 4, star3Box.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("3+ Estrelas", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filter3Plus = !filter3Plus;
+            }
+            filterItemY += 35;
+        }
+        
+        // Shipping Filter
+        DrawRectangle(filterX, filterItemY, filterWidth, 1, METAL_ACCENT);
+        filterItemY += 10;
+        Rectangle shippingHeader = {filterX, filterItemY, filterWidth, 40};
+        bool hoverShipping = CheckCollisionPointRec(GetMousePosition(), shippingHeader);
+        DrawRectangleRounded(shippingHeader, 0.1f, 4, hoverShipping ? METAL_ACCENT : METAL_PANEL);
+        DrawTextCustom("Envio", filterX + 10, filterItemY + 12, 18, TEXT_WHITE);
+        DrawTextCustom(filterShippingExpanded ? "^" : "v", filterX + filterWidth - 25, filterItemY + 12, 18, METAL_HIGHLIGHT);
+        if(CheckCollisionPointRec(GetMousePosition(), shippingHeader) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            filterShippingExpanded = !filterShippingExpanded;
+        }
+        filterItemY += 45;
+        
+        if(filterShippingExpanded) {
+            Rectangle freeBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(freeBox, 2, METAL_ACCENT);
+            if(filterFreeShipping) DrawRectangle(freeBox.x + 4, freeBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Envio Grátis", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterFreeShipping = !filterFreeShipping;
+            }
+            filterItemY += 30;
+            
+            Rectangle expressBox = {filterX + 10, filterItemY, 20, 20};
+            DrawRectangleLinesEx(expressBox, 2, METAL_ACCENT);
+            if(filterExpressShipping) DrawRectangle(expressBox.x + 4, expressBox.y + 4, 12, 12, BUTTON_BLUE);
+            DrawTextCustom("Envio Expresso", filterX + 40, filterItemY + 2, 16, TEXT_GRAY);
+            if(CheckCollisionPointRec(GetMousePosition(), {filterX, filterItemY, filterWidth, 25}) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                filterExpressShipping = !filterExpressShipping;
+            }
+            filterItemY += 35;
+        }
+        
+        EndScissorMode();
+        
+        // Filter sidebar scrolling
+        float filterContentHeight = filterItemY - (filterY - filterScrollOffset);
+        float filterMaxScroll = filterContentHeight - filterScrollArea.height;
+        if(filterMaxScroll < 0) filterMaxScroll = 0;
+        
+        if(CheckCollisionPointRec(GetMousePosition(), filterScrollArea)) {
+            float wheel = GetMouseWheelMove();
+            if(wheel != 0) {
+                filterScrollOffset -= wheel * 30.0f;
+                if(filterScrollOffset < 0) filterScrollOffset = 0;
+                if(filterScrollOffset > filterMaxScroll) filterScrollOffset = filterMaxScroll;
+            }
+        }
+        
+        // Draw scrollbar for filters if needed
+        if(filterMaxScroll > 0) {
+            float scrollbarX = filterScrollArea.width - 8;
+            float scrollbarY = filterScrollArea.y;
+            float scrollbarHeight = filterScrollArea.height;
+            float scrollbarWidth = 6;
+            
+            DrawRectangleRounded({scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight}, 0.5f, 4, METAL_ACCENT);
+            
+            float thumbHeight = (filterScrollArea.height / (filterContentHeight)) * scrollbarHeight;
+            if(thumbHeight < 30) thumbHeight = 30;
+            float thumbY = scrollbarY + (filterScrollOffset / filterMaxScroll) * (scrollbarHeight - thumbHeight);
+            DrawRectangleRounded({scrollbarX, thumbY, scrollbarWidth, thumbHeight}, 0.5f, 4, BUTTON_BLUE);
+        }
+
+        // Modern search bar with icon - moved to right side to avoid filter sidebar
+        Rectangle searchBar = {450, 110, 380, 40};
         DrawRectangle(searchBar.x + 2, searchBar.y + 2, searchBar.width, searchBar.height, Fade(SHADOW_COLOR, 0.2f));
         DrawRectangleRounded(searchBar, 0.2f, 8, METAL_PANEL);
         Color searchBorderColor = isSearchActive ? BUTTON_BLUE : METAL_ACCENT;
@@ -1058,6 +1511,110 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             std::transform(low.begin(),low.end(),low.begin(),::tolower);
             std::string q=search; std::transform(q.begin(),q.end(),q.begin(),::tolower);
             if(!q.empty()&&low.find(q)==std::string::npos) shown=false;
+            
+            // Filter by manufacturer (check product name for brand keywords)
+            if(filterAMD || filterIntel || filterNvidia) {
+                std::string nameLower = products[i].name;
+                std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+                bool matchesManu = false;
+                
+                if(filterAMD && (nameLower.find("amd") != std::string::npos || nameLower.find("ryzen") != std::string::npos || nameLower.find("radeon") != std::string::npos)) {
+                    matchesManu = true;
+                }
+                if(filterIntel && (nameLower.find("intel") != std::string::npos || nameLower.find("core i") != std::string::npos)) {
+                    matchesManu = true;
+                }
+                if(filterNvidia && (nameLower.find("nvidia") != std::string::npos || nameLower.find("geforce") != std::string::npos || nameLower.find("rtx") != std::string::npos || nameLower.find("gtx") != std::string::npos)) {
+                    matchesManu = true;
+                }
+                
+                if(!matchesManu) shown = false;
+            }
+            
+            // Filter by price range
+            if(products[i].price < filterMinPrice || products[i].price > filterMaxPrice) {
+                shown = false;
+            }
+            
+            // Filter by stock status
+            if(filterInStock && !products[i].inStock) {
+                shown = false;
+            }
+            if(filterOutOfStock && products[i].inStock) {
+                shown = false;
+            }
+            
+            // Filter by product state
+            if(filterPromotion && !products[i].isOnDiscount) {
+                shown = false;
+            }
+            // Note: filterNew and filterHighlight would need additional fields in Product struct
+            
+            // Filter by brand (more specific than manufacturer)
+            if(filterAsus || filterMSI || filterGigabyte || filterCorsair) {
+                std::string nameLower = products[i].name;
+                std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+                bool matchesBrand = false;
+                
+                if(filterAsus && nameLower.find("asus") != std::string::npos) {
+                    matchesBrand = true;
+                }
+                if(filterMSI && nameLower.find("msi") != std::string::npos) {
+                    matchesBrand = true;
+                }
+                if(filterGigabyte && nameLower.find("gigabyte") != std::string::npos) {
+                    matchesBrand = true;
+                }
+                if(filterCorsair && nameLower.find("corsair") != std::string::npos) {
+                    matchesBrand = true;
+                }
+                
+                if(!matchesBrand) shown = false;
+            }
+            
+            // Filter by rating
+            if(filter5Stars || filter4Plus || filter3Plus) {
+                bool matchesRating = false;
+                
+                if(filter5Stars && products[i].rating >= 4.8f) {
+                    matchesRating = true;
+                }
+                if(filter4Plus && products[i].rating >= 4.0f) {
+                    matchesRating = true;
+                }
+                if(filter3Plus && products[i].rating >= 3.0f) {
+                    matchesRating = true;
+                }
+                
+                if(!matchesRating) shown = false;
+            }
+            
+            // Filter by shipping (placeholder logic - would need shipping field in Product)
+            // For now, we'll use category and price as proxy:
+            // - Free shipping for items over 100 EUR or CPUs/GPUs
+            // - Express shipping available for smaller items under 500 EUR
+            if(filterFreeShipping || filterExpressShipping) {
+                bool matchesShipping = false;
+                ProductCategory cat = products[i].category;
+                
+                if(filterFreeShipping) {
+                    // Free shipping for expensive items or CPUs/GPUs
+                    if(products[i].price > 100 || cat == ProductCategory::CPU || 
+                       cat == ProductCategory::GPU) {
+                        matchesShipping = true;
+                    }
+                }
+                if(filterExpressShipping) {
+                    // Express shipping for smaller/lighter items
+                    if(cat == ProductCategory::RAM || cat == ProductCategory::STORAGE ||
+                       cat == ProductCategory::COOLING || products[i].price < 500) {
+                        matchesShipping = true;
+                    }
+                }
+                
+                if(!matchesShipping) shown = false;
+            }
+            
             if(shown) visible.push_back((int)i);
         }
         
@@ -1118,10 +1675,11 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         BeginScissorMode(scrollArea.x, scrollArea.y, scrollArea.width, scrollArea.height);
 
         // MODERN PRODUCT GRID with hover effects and scroll
+        float productStartX = 350; // Start products after filter sidebar
         for(size_t k=0;k<visible.size();++k){
             int i=visible[k];
             int row=k/cols, col=k%cols;
-            float x=40+col*(cardW+gutter);
+            float x=productStartX+col*(cardW+gutter);
             float y=190+row*(cardH+gutter) - scrollOffset;
             Rectangle card{x,y,cardW,cardH};
             
@@ -1129,6 +1687,13 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             if(y + cardH < 190 || y > 190 + viewportHeight) continue;
             
             bool isHovered = CheckCollisionPointRec(GetMousePosition(), card);
+            
+            // Click on card to view details (but not on buttons area)
+            Rectangle cardClickArea = {card.x, card.y, card.width, card.height - 50}; // Exclude bottom button area
+            if(CheckCollisionPointRec(GetMousePosition(), cardClickArea) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                selectedProductForDetails = i;
+                showProductDetails = true;
+            }
             
             // Card shadow
             DrawRectangle(card.x + 3, card.y + 3, card.width, card.height, Fade(SHADOW_COLOR, 0.35f));
@@ -1158,13 +1723,47 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             // Description (shifted right) - FONTE MAIOR
             DrawTextCustom(products[i].desc.c_str(), x+115, y+50, 16, TEXT_GRAY);
             
-            // Price badge
-            char priceBuf[32]; 
-            snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", products[i].price);
+            // Discount badge (if on discount)
+            if(products[i].isOnDiscount && products[i].discountPercent > 0) {
+                Rectangle discountBadge = {x + 10, y + 10, 65, 28};
+                DrawRectangleRounded(discountBadge, 0.3f, 6, BUTTON_RED);
+                char discountBuf[16];
+                snprintf(discountBuf, sizeof(discountBuf), "-%0.f%%", products[i].discountPercent);
+                int discW = MeasureTextCustom(discountBuf, 16);
+                DrawTextWithShadow(discountBuf, discountBadge.x + (discountBadge.width - discW)/2, discountBadge.y + 6, 16, TEXT_WHITE);
+            }
+            
+            // Price badge (with discount calculation)
+            char priceBuf[32];
+            float displayPrice = products[i].price;
+            if(products[i].isOnDiscount && products[i].discountPercent > 0) {
+                displayPrice = products[i].price * (1.0f - products[i].discountPercent / 100.0f);
+                snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", displayPrice);
+            } else {
+                snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", products[i].price);
+            }
             int priceW = MeasureTextCustom(priceBuf, 22);
             Rectangle priceBadge = {x + cardW - priceW - 30, y + 14, (float)priceW + 20, 30};
-            DrawRectangleRounded(priceBadge, 0.3f, 6, Fade(GOLD, 0.15f));
-            DrawTextWithShadow(priceBuf, priceBadge.x + 10, priceBadge.y + 5, 22, GOLD);
+            Color priceColor = products[i].isOnDiscount ? BUTTON_RED : GOLD;
+            DrawRectangleRounded(priceBadge, 0.3f, 6, Fade(priceColor, 0.15f));
+            DrawTextWithShadow(priceBuf, priceBadge.x + 10, priceBadge.y + 5, 22, priceColor);
+            
+            // Show original price if discounted
+            if(products[i].isOnDiscount && products[i].discountPercent > 0) {
+                char originalPriceBuf[32];
+                snprintf(originalPriceBuf, sizeof(originalPriceBuf), "EUR %.2f", products[i].price);
+                int origPriceW = MeasureTextCustom(originalPriceBuf, 14);
+                DrawTextCustom(originalPriceBuf, x + cardW - origPriceW - 20, y + 48, 14, TEXT_GRAY);
+                DrawLine(x + cardW - origPriceW - 20, y + 56, x + cardW - 20, y + 56, TEXT_GRAY);
+            }
+            
+            // Out of stock overlay
+            if(!products[i].inStock) {
+                DrawRectangleRounded(card, 0.05f, 8, Fade(BLACK, 0.7f));
+                const char* outOfStockText = "ESGOTADO";
+                int textW = MeasureTextCustom(outOfStockText, 32);
+                DrawTextWithShadow(outOfStockText, x + (cardW - textW)/2, y + cardH/2 - 16, 32, BUTTON_RED);
+            }
 
             // Quantity selector with +/- buttons
             // Initialize quantity if not set
@@ -1173,47 +1772,49 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             }
             int& selectedQty = productQuantitySelector[products[i].id];
             
-            // Quantity control buttons
+            // Quantity control buttons (disabled if out of stock)
             Rectangle btnQtyMinus = {x + 115, y + cardH - 40, 35, 32};
             Rectangle btnQtyDisplay = {x + 155, y + cardH - 40, 50, 32};
             Rectangle btnQtyPlus = {x + 210, y + cardH - 40, 35, 32};
             
-            // Minus button
-            if(DrawButton("-", btnQtyMinus, BUTTON_RED)) {
-                if(selectedQty > 1) selectedQty--;
-            }
-            
-            // Quantity display
-            char qtyBuf[16];
-            snprintf(qtyBuf, sizeof(qtyBuf), "%d", selectedQty);
-            DrawRectangleRounded(btnQtyDisplay, 0.1f, 4, METAL_ACCENT);
-            DrawRectangleLinesEx(btnQtyDisplay, 1.0f, METAL_HIGHLIGHT);
-            int qtyTextW = MeasureTextCustom(qtyBuf, 18);
-            DrawTextCustom(qtyBuf, btnQtyDisplay.x + (btnQtyDisplay.width - qtyTextW) / 2, btnQtyDisplay.y + 7, 18, TEXT_WHITE);
-            
-            // Plus button
-            if(DrawButton("+", btnQtyPlus, SUCCESS_GREEN)) {
-                selectedQty++;
-            }
-            
-            // Add to cart button (uses selected quantity)
-            Rectangle btn = {x + cardW - 130, y + cardH - 40, 115, 32};
-            if(DrawButton("Carrinho", btn, BUTTON_BLUE)){
-                if(!isLoggedIn) showLoginPrompt=true;
-                else{
-                    auto it=std::find_if(cart.begin(),cart.end(),
-                        [&](const CartItem&c){return c.product.id==products[i].id;});
-                    char toastBuf[128];
-                    if(it!=cart.end()) {
-                        it->qty += selectedQty;
-                        snprintf(toastBuf, sizeof(toastBuf), "Adicionado %d unidade(s)!", selectedQty);
-                    } else {
-                        cart.push_back({products[i], selectedQty});
-                        snprintf(toastBuf, sizeof(toastBuf), "%d produto(s) adicionado(s)!", selectedQty);
+            if(products[i].inStock) {
+                // Minus button
+                if(DrawButton("-", btnQtyMinus, BUTTON_RED)) {
+                    if(selectedQty > 1) selectedQty--;
+                }
+                
+                // Quantity display
+                char qtyBuf[16];
+                snprintf(qtyBuf, sizeof(qtyBuf), "%d", selectedQty);
+                DrawRectangleRounded(btnQtyDisplay, 0.1f, 4, METAL_ACCENT);
+                DrawRectangleLinesEx(btnQtyDisplay, 1.0f, METAL_HIGHLIGHT);
+                int qtyTextW = MeasureTextCustom(qtyBuf, 18);
+                DrawTextCustom(qtyBuf, btnQtyDisplay.x + (btnQtyDisplay.width - qtyTextW) / 2, btnQtyDisplay.y + 7, 18, TEXT_WHITE);
+                
+                // Plus button
+                if(DrawButton("+", btnQtyPlus, SUCCESS_GREEN)) {
+                    selectedQty++;
+                }
+                
+                // Add to cart button (uses selected quantity)
+                Rectangle btn = {x + cardW - 130, y + cardH - 40, 115, 32};
+                if(DrawButton("Carrinho", btn, BUTTON_BLUE)){
+                    if(!isLoggedIn) showLoginPrompt=true;
+                    else{
+                        auto it=std::find_if(cart.begin(),cart.end(),
+                            [&](const CartItem&c){return c.product.id==products[i].id;});
+                        char toastBuf[128];
+                        if(it!=cart.end()) {
+                            it->qty += selectedQty;
+                            snprintf(toastBuf, sizeof(toastBuf), "Adicionado %d unidade(s)!", selectedQty);
+                        } else {
+                            cart.push_back({products[i], selectedQty});
+                            snprintf(toastBuf, sizeof(toastBuf), "%d produto(s) adicionado(s)!", selectedQty);
+                        }
+                        toastMessage = std::string(toastBuf);
+                        toastTimer = 2.0f;
+                        selectedQty = 1; // Reset after adding
                     }
-                    toastMessage = std::string(toastBuf);
-                    toastTimer = 2.0f;
-                    selectedQty = 1; // Reset after adding
                 }
             }
         }
@@ -1237,8 +1838,8 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             DrawRectangleRounded({scrollbarX, thumbY, scrollbarWidth, thumbHeight}, 0.5f, 4, BUTTON_BLUE);
         }
 
-        // Category filter button with dropdown (DRAWN AFTER products to appear on top)
-        Rectangle btnCategoryFilter = {40, 110, 180, 40};
+        // Category filter button with dropdown (DRAWN AFTER products to appear on top) - moved to right
+        Rectangle btnCategoryFilter = {850, 110, 180, 40};
         bool hoverCatBtn = CheckCollisionPointRec(GetMousePosition(), btnCategoryFilter);
         
         DrawRectangle(btnCategoryFilter.x + 2, btnCategoryFilter.y + 2, btnCategoryFilter.width, btnCategoryFilter.height, Fade(SHADOW_COLOR, 0.2f));
@@ -1313,6 +1914,155 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         // MODAL DO CARRINHO
         if(showCart){
             ShowCartModal(screenWidth, screenHeight, cart, showCart, cartMessage);
+        }
+        
+        // Product Details Modal
+        if(showProductDetails && selectedProductForDetails >= 0 && selectedProductForDetails < (int)products.size()){
+            // Dark overlay
+            DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.7f));
+            
+            // Modal window
+            Rectangle modal = {(float)screenWidth/2 - 400, (float)screenHeight/2 - 300, 800, 600};
+            DrawRectangle(modal.x, modal.y, modal.width, modal.height, METAL_BG);
+            DrawRectangleRounded(modal, 0.02f, 8, METAL_PANEL);
+            DrawRectangleLinesEx(modal, 3, BUTTON_BLUE);
+            
+            const Product& p = products[selectedProductForDetails];
+            
+            // Close button
+            Rectangle btnClose = {modal.x + modal.width - 45, modal.y + 10, 35, 35};
+            if(DrawButton("X", btnClose, BUTTON_RED)) {
+                showProductDetails = false;
+            }
+            
+            // Title
+            DrawTextWithShadow("Detalhes do Produto", modal.x + 20, modal.y + 20, 28, TEXT_WHITE);
+            
+            // Product image (larger)
+            Texture2D detailImg = GetProductImage(p.imagePath);
+            Rectangle detailImgRect = {modal.x + 30, modal.y + 70, 300, 300};
+            DrawTexturePro(detailImg, 
+                          {0, 0, (float)detailImg.width, (float)detailImg.height},
+                          detailImgRect,
+                          {0, 0}, 0, WHITE);
+            DrawRectangleLinesEx(detailImgRect, 2, METAL_ACCENT);
+            
+            // Product info (right side)
+            float infoX = modal.x + 350;
+            float infoY = modal.y + 70;
+            
+            // Product name
+            DrawTextWithShadow(p.name.c_str(), infoX, infoY, 24, TEXT_WHITE);
+            infoY += 35;
+            
+            // Category
+            char catBuf[64];
+            snprintf(catBuf, sizeof(catBuf), "Categoria: %s", CategoryToString(p.category).c_str());
+            DrawTextCustom(catBuf, infoX, infoY, 18, METAL_BRONZE);
+            infoY += 30;
+            
+            // Stock status
+            const char* stockText = p.inStock ? "Em Stock" : "ESGOTADO";
+            Color stockColor = p.inStock ? SUCCESS_GREEN : BUTTON_RED;
+            DrawTextCustom(stockText, infoX, infoY, 18, stockColor);
+            infoY += 30;
+            
+            // Rating with stars
+            DrawTextCustom("Avaliacao:", infoX, infoY, 18, TEXT_WHITE);
+            infoY += 25;
+            for(int s = 0; s < 5; s++) {
+                Color starColor = (s < (int)p.rating) ? GOLD : METAL_ACCENT;
+                if(s < (int)p.rating && (p.rating - s) >= 0.5f) {
+                    starColor = GOLD;
+                } else if(s >= (int)p.rating) {
+                    starColor = METAL_ACCENT;
+                }
+                DrawTextCustom("*", infoX + s * 25, infoY, 24, starColor);
+            }
+            char ratingBuf[16];
+            snprintf(ratingBuf, sizeof(ratingBuf), "%.1f/5.0", p.rating);
+            DrawTextCustom(ratingBuf, infoX + 140, infoY + 3, 18, TEXT_GRAY);
+            infoY += 40;
+            
+            // Price
+            float displayPrice = p.price;
+            if(p.isOnDiscount && p.discountPercent > 0) {
+                displayPrice = p.price * (1.0f - p.discountPercent / 100.0f);
+                
+                // Discount badge
+                char discountBuf[32];
+                snprintf(discountBuf, sizeof(discountBuf), "DESCONTO -%0.f%%", p.discountPercent);
+                DrawTextCustom(discountBuf, infoX, infoY, 20, BUTTON_RED);
+                infoY += 30;
+                
+                // Original price (crossed out)
+                char originalPriceBuf[32];
+                snprintf(originalPriceBuf, sizeof(originalPriceBuf), "EUR %.2f", p.price);
+                DrawTextCustom(originalPriceBuf, infoX, infoY, 18, TEXT_GRAY);
+                int origW = MeasureTextCustom(originalPriceBuf, 18);
+                DrawLine(infoX, infoY + 10, infoX + origW, infoY + 10, TEXT_GRAY);
+                infoY += 25;
+            }
+            
+            char priceBuf[32];
+            snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", displayPrice);
+            DrawTextWithShadow(priceBuf, infoX, infoY, 32, GOLD);
+            infoY += 50;
+            
+            // Description
+            DrawTextCustom("Descricao:", infoX, infoY, 18, TEXT_WHITE);
+            infoY += 25;
+            
+            // Word wrap description
+            std::string desc = p.desc;
+            int maxWidth = 400;
+            int lineHeight = 20;
+            size_t pos = 0;
+            while(pos < desc.length() && infoY < modal.y + modal.height - 80) {
+                size_t endPos = pos;
+                int currentWidth = 0;
+                while(endPos < desc.length()) {
+                    char c = desc[endPos];
+                    currentWidth += 8; // Approximate character width
+                    if(currentWidth > maxWidth) break;
+                    if(c == '\n') {
+                        endPos++;
+                        break;
+                    }
+                    endPos++;
+                }
+                
+                // Back up to last space if we broke mid-word
+                if(endPos < desc.length() && desc[endPos] != ' ' && desc[endPos] != '\n') {
+                    size_t lastSpace = desc.rfind(' ', endPos);
+                    if(lastSpace > pos) endPos = lastSpace + 1;
+                }
+                
+                std::string line = desc.substr(pos, endPos - pos);
+                DrawTextCustom(line.c_str(), infoX, infoY, 16, TEXT_GRAY);
+                infoY += lineHeight;
+                pos = endPos;
+            }
+            
+            // Add to cart button (if in stock)
+            if(p.inStock) {
+                Rectangle btnAddToCart = {modal.x + modal.width - 220, modal.y + modal.height - 60, 180, 45};
+                if(DrawButton("Adicionar ao Carrinho", btnAddToCart, SUCCESS_GREEN)) {
+                    // Add to cart logic
+                    auto it = std::find_if(cart.begin(), cart.end(), [&](const CartItem& item) {
+                        return item.product.id == p.id;
+                    });
+                    if(it != cart.end()) {
+                        it->qty += 1;
+                        toastMessage = "Quantidade atualizada!";
+                    } else {
+                        cart.push_back({p, 1});
+                        toastMessage = "Adicionado ao carrinho!";
+                    }
+                    toastTimer = 2.0f;
+                    showProductDetails = false;
+                }
+            }
         }
         
         // PAINEL ADMIN

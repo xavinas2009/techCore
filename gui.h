@@ -25,6 +25,10 @@ struct Product {
     Color color;
     ProductCategory category;
     std::string imagePath; // Path to product image
+    bool inStock;          // Stock availability
+    bool isOnDiscount;     // Promotion status
+    float discountPercent; // Discount percentage (0-100)
+    float rating;          // Product rating (0.0-5.0)
 };
 
 struct CartItem {
