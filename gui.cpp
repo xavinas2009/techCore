@@ -207,9 +207,6 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
         // Logo text fallback
         DrawTextCustom("TC", logoBox.x + 14, logoBox.y + 14, 24, TEXT_WHITE);
     }
-    
-    // Title with modern typography
-    DrawTextCustom("TechCore", 150, 20, 32, METAL_HIGHLIGHT);
 
     // Admin button (only if logged in)
     if(isLoggedIn) {
