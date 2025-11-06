@@ -21,3 +21,8 @@
 [2025-11-03 10:52:19] BACKUP: [OK] Backup de produtos: backups/products_backup_2025-11-03_10-52-19.txt
 [2025-11-03 10:52:19] BACKUP: [OK] Backup de usuarios: backups/users_backup_2025-11-03_10-52-19.txt
 [2025-11-03 10:52:20] REPORT: [OK] Relatorio gerado: reports/report_2025-11-03_10-52-20.txt
+[2025-11-04 12:59:19] EXPORT_CSV: [OK] Exportado: exports/products_2025-11-04_12-59-19.csv (120 produtos)
+[2025-11-04 12:59:22] REPORT: [OK] Relatorio gerado: reports/report_2025-11-04_12-59-22.txt
+[2025-11-04 12:59:22] BACKUP: [OK] Backup de produtos: backups/products_backup_2025-11-04_12-59-22.txt
+[2025-11-04 12:59:22] BACKUP: [OK] Backup de usuarios: backups/users_backup_2025-11-04_12-59-22.txt
+[2025-11-04 12:59:24] REPORT: [OK] Relatorio gerado: reports/report_2025-11-04_12-59-24.txt
