@@ -22,20 +22,24 @@ static bool placeholderLoaded = false;
 // Product quantity selector cache (for selecting quantity before adding to cart)
 static std::map<int, int> productQuantitySelector;
 
-// Modern Theme colors - MELHORADA LEGIBILIDADE
-static const Color METAL_BG = {15, 15, 18, 255};
-static const Color METAL_PANEL = {28, 28, 32, 255};
-static const Color METAL_ACCENT = {65, 70, 80, 255};
-static const Color METAL_HIGHLIGHT = {240, 240, 245, 255};  // Mais brilhante
-static const Color METAL_BRONZE = {180, 176, 172, 255};     // Mais claro para melhor leitura
+// Modern Theme colors - MELHORADA LEGIBILIDADE & VISUAL
+static const Color METAL_BG = {10, 12, 18, 255};           // Mais escuro e elegante
+static const Color METAL_PANEL = {20, 24, 35, 255};        // Painel com mais profundidade
+static const Color METAL_ACCENT = {50, 60, 80, 255};       // Accent mais forte
+static const Color METAL_HIGHLIGHT = {255, 255, 255, 255}; // Branco puro
+static const Color METAL_BRONZE = {180, 176, 172, 255};
 static const Color BUTTON_BLUE = {59, 130, 246, 255};
 static const Color BUTTON_BLUE_HOVER = {96, 165, 250, 255};
-static const Color BUTTON_RED = {220, 38, 38, 255};
-static const Color TEXT_WHITE = {255, 255, 255, 255};       // Branco puro
-static const Color TEXT_GRAY = {200, 200, 205, 255};        // Cinza claro para texto secundário
-static const Color SHADOW_COLOR = {0, 0, 0, 80};
-static const Color CARD_HOVER = {38, 38, 42, 255};
+static const Color BUTTON_RED = {239, 68, 68, 255};        // Vermelho mais vibrante
+static const Color TEXT_WHITE = {255, 255, 255, 255};
+static const Color TEXT_GRAY = {200, 200, 205, 255};
+static const Color SHADOW_COLOR = {0, 0, 0, 100};
+static const Color CARD_HOVER = {35, 42, 60, 255};
 static const Color SUCCESS_GREEN = {34, 197, 94, 255};
+static const Color ACCENT_CYAN = {34, 211, 238, 255};       // Novo: cyan accent
+static const Color ACCENT_PURPLE = {168, 85, 247, 255};     // Novo: purple accent
+static const Color ACCENT_GOLD = {250, 204, 21, 255};       // Novo: gold accent
+static const Color GRADIENT_DARK = {15, 20, 30, 255};       // Novo: gradient escuro
 
 // Helper function to draw text with custom font (HD rendering)
 void DrawTextCustom(const char* text, int posX, int posY, int fontSize, Color color) {
@@ -1031,8 +1035,10 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     SortMode sortMode = SORT_NONE;
 
     while (!WindowShouldClose()) {
-        BeginDrawing();
-        ClearBackground(METAL_BG);
+    BeginDrawing();
+    ClearBackground(METAL_BG);
+    // Subtle large header gradient to give depth to the UI
+    DrawRectangleGradientV(0, 80, screenWidth, 260, Fade(ACCENT_PURPLE, 0.12f), Fade(ACCENT_CYAN, 0.06f));
         
         // Update toast timer
         if(toastTimer > 0) {
@@ -1691,27 +1697,44 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                 showProductDetails = true;
             }
             
-            // Card shadow
-            DrawRectangle(card.x + 3, card.y + 3, card.width, card.height, Fade(SHADOW_COLOR, 0.35f));
-            
-            // Card background with hover effect
+            // Slight hover expansion for better affordance
+            Rectangle drawCard = card;
+            if (isHovered) {
+                drawCard = {card.x - 6, card.y - 6, card.width + 12, card.height + 12};
+            }
+
+            // Card shadow - melhorado com gradiente
+            DrawRectangle(drawCard.x + 4, drawCard.y + 4, drawCard.width, drawCard.height, Fade(SHADOW_COLOR, 0.45f));
+
+            // Card background with hover effect - melhorado
             Color cardBg = isHovered ? CARD_HOVER : METAL_PANEL;
-            DrawRectangleRounded(card, 0.05f, 8, cardBg);
-            Color cardBorder = isHovered ? BUTTON_BLUE : METAL_ACCENT;
-            DrawRectangleLinesEx(card, 2.0f, cardBorder);
-            
-            // Color indicator strip
-            Rectangle colorStrip = {card.x, card.y, 5, card.height};
+            DrawRectangleRounded(drawCard, 0.1f, 10, cardBg);
+
+            // Card border effect
+            Color cardBorder = isHovered ? ACCENT_CYAN : METAL_ACCENT;
+            float borderWidth = isHovered ? 2.8f : 1.2f;
+            DrawRectangleLinesEx(drawCard, borderWidth, cardBorder);
+
+            // Inner highlight border para efeito 3D
+            Rectangle innerBorder = {drawCard.x + 1, drawCard.y + 1, drawCard.width - 2, drawCard.height - 2};
+            DrawRectangleLinesEx(innerBorder, 1.0f, Fade(METAL_HIGHLIGHT, 0.08f));
+
+            // Color indicator strip - melhorado
+            Rectangle colorStrip = {drawCard.x, drawCard.y, 6, drawCard.height};
             DrawRectangleRounded(colorStrip, 0.5f, 4, products[i].color);
+            // Glow effect na strip
+            DrawRectangleLinesEx(colorStrip, 1.0f, Fade(products[i].color, 0.45f));
             
-            // Product image thumbnail (left side)
+            // Product image thumbnail (left side) - com hover effect
             Texture2D productImg = GetProductImage(products[i].imagePath);
             Rectangle imgRect = {x + 15, y + 10, 90, 90};
+            // Image shadow
+            DrawRectangle(imgRect.x + 2, imgRect.y + 2, imgRect.width, imgRect.height, Fade(SHADOW_COLOR, 0.3f));
             DrawTexturePro(productImg, 
                           {0, 0, (float)productImg.width, (float)productImg.height},
                           imgRect,
-                          {0, 0}, 0, WHITE);
-            DrawRectangleLinesEx(imgRect, 1, METAL_ACCENT);
+                          {0, 0}, 0, isHovered ? WHITE : Fade(WHITE, 0.9f));
+            DrawRectangleLinesEx(imgRect, isHovered ? 2.0f : 1.5f, isHovered ? ACCENT_CYAN : METAL_ACCENT);
             
             // Product name (shifted right to make room for image) - FONTE MAIOR
             DrawTextWithShadow(products[i].name.c_str(), x+115, y+16, 24, TEXT_WHITE);
