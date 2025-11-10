@@ -1,5 +1,4 @@
-
-1|AMD Ryzen 5 5600X|6-Core/12-Thread, 3.7GHz Base, 4.6GHz Boost|199.99|255,161,0|CPU|thumbnails/cpu.png|0|0|0|3.8
+1|Processador|6-Core/12-Thread, 3.7GHz Base, 4.6GHz Boost|199.99|0,82,172|CPU|thumbnails/cpu.png|0|0|0|3.8
 2|AMD Ryzen 7 5800X|8-Core/16-Thread, 3.8GHz Base, 4.7GHz Boost|349.99|255,161,0|CPU|thumbnails/cpu.png|1|0|0|4.4
 3|AMD Ryzen 9 5950X|16-Core/32-Thread, 3.4GHz Base, 4.9GHz Boost|549.99|255,161,0|CPU|thumbnails/cpu.png|1|0|0|4.2
 4|AMD Ryzen 5 7600X|6-Core/12-Thread, 4.7GHz Base, 5.3GHz Boost|249.99|255,161,0|CPU|thumbnails/cpu.png|1|0|0|4.5

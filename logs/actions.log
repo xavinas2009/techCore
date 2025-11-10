@@ -26,3 +26,4 @@
 [2025-11-04 12:59:22] BACKUP: [OK] Backup de produtos: backups/products_backup_2025-11-04_12-59-22.txt
 [2025-11-04 12:59:22] BACKUP: [OK] Backup de usuarios: backups/users_backup_2025-11-04_12-59-22.txt
 [2025-11-04 12:59:24] REPORT: [OK] Relatorio gerado: reports/report_2025-11-04_12-59-24.txt
+[2025-11-10 09:45:40] UPDATE: Produto atualizado: Processador (EUR 199.990005)

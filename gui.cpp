@@ -22,21 +22,71 @@ static bool placeholderLoaded = false;
 // Product quantity selector cache (for selecting quantity before adding to cart)
 static std::map<int, int> productQuantitySelector;
 
-// Modern Theme colors - MELHORADA LEGIBILIDADE
-static const Color METAL_BG = {15, 15, 18, 255};
-static const Color METAL_PANEL = {28, 28, 32, 255};
-static const Color METAL_ACCENT = {65, 70, 80, 255};
-static const Color METAL_HIGHLIGHT = {240, 240, 245, 255};  // Mais brilhante
-static const Color METAL_BRONZE = {180, 176, 172, 255};     // Mais claro para melhor leitura
-static const Color BUTTON_BLUE = {59, 130, 246, 255};
-static const Color BUTTON_BLUE_HOVER = {96, 165, 250, 255};
-static const Color BUTTON_RED = {220, 38, 38, 255};
-static const Color TEXT_WHITE = {255, 255, 255, 255};       // Branco puro
-static const Color TEXT_GRAY = {200, 200, 205, 255};        // Cinza claro para texto secundário
-static const Color SHADOW_COLOR = {0, 0, 0, 80};
-static const Color CARD_HOVER = {38, 38, 42, 255};
-static const Color SUCCESS_GREEN = {34, 197, 94, 255};
-static const Color SUCCESS_GREEN_HOVER = {74, 222, 128, 255};
+// Particle system for ambient background effects
+struct Particle {
+    Vector2 position;
+    Vector2 velocity;
+    float size;
+    float alpha;
+    Color color;
+};
+
+static std::vector<Particle> particles;
+static bool particlesInitialized = false;
+
+void InitParticles(int screenWidth, int screenHeight) {
+    if(particlesInitialized) return;
+    particles.clear();
+    for(int i = 0; i < 50; i++) {
+        Particle p;
+        p.position = {(float)GetRandomValue(0, screenWidth), (float)GetRandomValue(0, screenHeight)};
+        p.velocity = {(float)GetRandomValue(-20, 20) / 100.0f, (float)GetRandomValue(-30, -10) / 100.0f};
+        p.size = (float)GetRandomValue(1, 4);
+        p.alpha = (float)GetRandomValue(10, 40) / 100.0f;
+        p.color = {100, 150, 255, (unsigned char)(p.alpha * 255)};
+        particles.push_back(p);
+    }
+    particlesInitialized = true;
+}
+
+void UpdateParticles(int screenWidth, int screenHeight) {
+    for(auto& p : particles) {
+        p.position.x += p.velocity.x;
+        p.position.y += p.velocity.y;
+        
+        // Wrap around screen
+        if(p.position.x < 0) p.position.x = screenWidth;
+        if(p.position.x > screenWidth) p.position.x = 0;
+        if(p.position.y < 0) p.position.y = screenHeight;
+        if(p.position.y > screenHeight) p.position.y = 0;
+    }
+}
+
+void DrawParticles() {
+    for(const auto& p : particles) {
+        DrawCircleV(p.position, p.size, Fade(p.color, p.alpha));
+        // Subtle glow
+        DrawCircleV(p.position, p.size * 1.5f, Fade(p.color, p.alpha * 0.3f));
+    }
+}
+
+// Modern Premium Theme colors - Enhanced visuals
+static const Color METAL_BG = {12, 12, 15, 255};            // Darker, richer background
+static const Color METAL_PANEL = {24, 24, 28, 255};         // Elevated surface
+static const Color METAL_ACCENT = {55, 60, 72, 255};        // Refined accent
+static const Color METAL_HIGHLIGHT = {245, 245, 250, 255};  // Bright highlights
+static const Color METAL_BRONZE = {185, 180, 175, 255};     // Soft secondary text
+static const Color BUTTON_BLUE = {37, 99, 235, 255};        // Vibrant primary blue
+static const Color BUTTON_BLUE_HOVER = {59, 130, 246, 255}; // Lighter hover
+static const Color BUTTON_RED = {239, 68, 68, 255};         // Bright red
+static const Color TEXT_WHITE = {255, 255, 255, 255};       // Pure white
+static const Color TEXT_GRAY = {156, 163, 175, 255};        // Subtle gray
+static const Color SHADOW_COLOR = {0, 0, 0, 120};           // Deeper shadows
+static const Color CARD_HOVER = {32, 35, 42, 255};          // Hover state
+static const Color SUCCESS_GREEN = {16, 185, 129, 255};     // Fresh green
+static const Color SUCCESS_GREEN_HOVER = {52, 211, 153, 255}; // Lighter green
+static const Color PREMIUM_GOLD = {251, 191, 36, 255};      // Gold accent
+static const Color PREMIUM_PURPLE = {147, 51, 234, 255};    // Premium purple
 
 // Helper function to draw text with custom font (HD rendering)
 void DrawTextCustom(const char* text, int posX, int posY, int fontSize, Color color) {
@@ -68,11 +118,48 @@ void DrawTextWithShadow(const char* text, int posX, int posY, int fontSize, Colo
     DrawTextCustom(text, posX, posY, fontSize, color);
 }
 
-// Enhanced Button utility with hover effect
+// Premium gradient text for special elements
+void DrawTextGradient(const char* text, int posX, int posY, int fontSize, Color topColor, Color bottomColor) {
+    if(fontLoaded) {
+        float spacing = fontSize * 0.08f;
+        Vector2 textSize = MeasureTextEx(customFont, text, (float)fontSize, spacing);
+        
+        // Create gradient by drawing text multiple times with different alpha
+        for(int i = 0; i < textSize.y; i++) {
+            float ratio = (float)i / textSize.y;
+            Color blendColor = {
+                (unsigned char)(topColor.r * (1-ratio) + bottomColor.r * ratio),
+                (unsigned char)(topColor.g * (1-ratio) + bottomColor.g * ratio),
+                (unsigned char)(topColor.b * (1-ratio) + bottomColor.b * ratio),
+                (unsigned char)(topColor.a * (1-ratio) + bottomColor.a * ratio)
+            };
+            
+            // Draw line by line with scissor to create gradient effect
+            BeginScissorMode(posX, posY + i, textSize.x, 1);
+            DrawTextEx(customFont, text, {(float)posX, (float)posY}, (float)fontSize, spacing, blendColor);
+            EndScissorMode();
+        }
+    } else {
+        DrawTextCustom(text, posX, posY, fontSize, topColor);
+    }
+}
+
+// Ultra-enhanced Button utility with smooth transitions
 bool DrawButton(const char *label, Rectangle r, Color bg) {
     Vector2 mousePos = GetMousePosition();
     bool isHovered = CheckCollisionPointRec(mousePos, r);
     bool isPressed = isHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+    
+    // Smooth scale animation on hover
+    static std::map<std::string, float> buttonScales;
+    std::string btnKey = std::string(label) + std::to_string((int)r.x);
+    if(buttonScales.find(btnKey) == buttonScales.end()) buttonScales[btnKey] = 1.0f;
+    float targetScale = isHovered ? 1.05f : 1.0f;
+    buttonScales[btnKey] += (targetScale - buttonScales[btnKey]) * 0.25f;
+    
+    // Apply scale
+    float scaleOffset = (r.width * buttonScales[btnKey] - r.width) / 2;
+    Rectangle scaledR = {r.x - scaleOffset, r.y - scaleOffset, r.width * buttonScales[btnKey], r.height * buttonScales[btnKey]};
     
     Color btnColor = bg;
     if (isHovered && bg.r == BUTTON_BLUE.r && bg.g == BUTTON_BLUE.g && bg.b == BUTTON_BLUE.b) {
@@ -81,18 +168,39 @@ bool DrawButton(const char *label, Rectangle r, Color bg) {
         btnColor = ColorBrightness(bg, 0.2f);
     }
     
-    // Shadow
-    DrawRectangle(r.x + 2, r.y + 2, r.width, r.height, Fade(SHADOW_COLOR, 0.3f));
+    // Ultra-enhanced multi-layer shadow with blur
+    DrawRectangleRounded({scaledR.x + 3, scaledR.y + 6, scaledR.width, scaledR.height}, 0.25f, 8, Fade(SHADOW_COLOR, 0.5f));
+    DrawRectangleRounded({scaledR.x + 2, scaledR.y + 3, scaledR.width, scaledR.height}, 0.25f, 8, Fade(SHADOW_COLOR, 0.3f));
+    DrawRectangleRounded({scaledR.x + 1, scaledR.y + 1, scaledR.width, scaledR.height}, 0.25f, 8, Fade(SHADOW_COLOR, 0.15f));
     
-    // Button with rounded corners
-    DrawRectangleRounded(r, 0.2f, 8, btnColor);
+    // Animated outer glow on hover
+    if(isHovered) {
+        static float glowPulse = 0.0f;
+        glowPulse += 0.08f;
+        float glowSize = 3.0f + sin(glowPulse) * 1.5f;
+        DrawRectangleRounded({scaledR.x - glowSize, scaledR.y - glowSize, 
+                             scaledR.width + glowSize*2, scaledR.height + glowSize*2}, 
+                            0.25f, 8, Fade(btnColor, 0.2f + sin(glowPulse) * 0.1f));
+    }
     
-    // Border
-    Color borderColor = isHovered ? METAL_HIGHLIGHT : METAL_ACCENT;
-    DrawRectangleLinesEx(r, 2.0f, borderColor);
+    // Button with gradient
+    DrawRectangleGradientV(scaledR.x, scaledR.y, scaledR.width, scaledR.height,
+                          btnColor, ColorBrightness(btnColor, -0.15f));
+    
+    // Premium top shine
+    Rectangle topShine = {scaledR.x, scaledR.y, scaledR.width, scaledR.height / 2.5f};
+    DrawRectangleRounded(topShine, 0.25f, 8, Fade(WHITE, 0.15f));
+    
+    // Animated border
+    if(isHovered) {
+        static float borderPulse = 0.0f;
+        borderPulse += 0.1f;
+        DrawRectangleLinesEx(scaledR, 3.0f, Fade(METAL_HIGHLIGHT, 0.7f + sin(borderPulse) * 0.2f));
+    }
+    DrawRectangleLinesEx(scaledR, 2.0f, isHovered ? METAL_HIGHLIGHT : METAL_ACCENT);
     
     int txtW = MeasureTextCustom(label, 20);
-    DrawTextCustom(label, (int)(r.x + (r.width-txtW)/2), (int)(r.y+(r.height-20)/2), 20, TEXT_WHITE);
+    DrawTextWithShadow(label, (int)(scaledR.x + (scaledR.width-txtW)/2), (int)(scaledR.y+(scaledR.height-20)/2), 20, TEXT_WHITE, 2);
     
     return isPressed;
 }
@@ -191,9 +299,13 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
         }
     }
     
-    // Header gradient background
-    DrawRectangleGradientV(0, 0, screenW, 80, METAL_PANEL, METAL_BG);
-    DrawRectangle(0, 80, screenW, 2, METAL_ACCENT);
+    // Premium header with enhanced gradient
+    DrawRectangleGradientV(0, 0, screenW, 82, {18, 18, 22, 255}, METAL_BG);
+    // Subtle top highlight
+    DrawRectangle(0, 0, screenW, 1, Fade(METAL_HIGHLIGHT, 0.1f));
+    // Bottom border with glow
+    DrawRectangle(0, 82, screenW, 3, BUTTON_BLUE);
+    DrawRectangle(0, 85, screenW, 1, Fade(BUTTON_BLUE, 0.5f));
     
     // Logo box with shadow and modern design
     Rectangle logoBox{16.0f, 8.0f, 120.0f, 64.0f};
@@ -272,18 +384,43 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
 }
 
 void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& cart, bool& showModal, std::string& cartMessage, bool& showCheckout, bool isLoggedIn, bool& showLoginPrompt) {
-    // Modal backdrop with blur effect
-    DrawRectangle(0,0,screenWidth,screenHeight, Fade(BLACK,0.75f));
+    // Ultra-premium backdrop with radial gradient
+    DrawRectangle(0,0,screenWidth,screenHeight, Fade(BLACK,0.85f));
+    
+    // Animated vignette effect
+    static float vignetteTime = 0.0f;
+    vignetteTime += GetFrameTime() * 0.5f;
+    float vignettePulse = 0.3f + sin(vignetteTime) * 0.05f;
+    DrawCircleGradient(screenWidth/2, screenHeight/2, screenWidth * 0.8f, Fade(BLACK, 0.0f), Fade(BLACK, vignettePulse));
+    
+    // Consume all clicks on backdrop and modal to prevent click-through
+    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        // Click consumed - prevents any background interaction
+    }
     
     int mw = 650, mh = 500;
     Rectangle modal{(float)(screenWidth/2-mw/2), (float)(screenHeight/2-mh/2), (float)mw, (float)mh};
     
-    // Shadow
-    DrawRectangle(modal.x + 4, modal.y + 4, modal.width, modal.height, Fade(SHADOW_COLOR, 0.5f));
+    // Ultra-enhanced multi-layer shadow with huge depth
+    DrawRectangleRounded({modal.x + 5, modal.y + 10, modal.width, modal.height}, 0.03f, 8, Fade(SHADOW_COLOR, 0.8f));
+    DrawRectangleRounded({modal.x + 3, modal.y + 6, modal.width, modal.height}, 0.03f, 8, Fade(SHADOW_COLOR, 0.5f));
+    DrawRectangleRounded({modal.x + 1, modal.y + 3, modal.width, modal.height}, 0.03f, 8, Fade(SHADOW_COLOR, 0.3f));
     
-    // Modal background with gradient
-    DrawRectangleRounded(modal, 0.02f, 8, METAL_PANEL);
-    DrawRectangleLinesEx(modal, 2.0f, METAL_ACCENT);
+    // Animated outer glow
+    static float modalGlow = 0.0f;
+    modalGlow += 0.05f;
+    float glowIntensity = 0.3f + sin(modalGlow) * 0.1f;
+    DrawRectangleRounded({modal.x - 5, modal.y - 5, modal.width + 10, modal.height + 10}, 0.03f, 8, Fade(BUTTON_BLUE, glowIntensity));
+    
+    // Modal background with premium gradient
+    DrawRectangleGradientV(modal.x, modal.y, modal.width, modal.height, METAL_PANEL, ColorBrightness(METAL_PANEL, -0.1f));
+    // Top shine with gradient
+    Rectangle topShine = {modal.x, modal.y, modal.width, 120};
+    DrawRectangleGradientV(topShine.x, topShine.y, topShine.width, topShine.height, 
+                          Fade(METAL_HIGHLIGHT, 0.05f), Fade(METAL_HIGHLIGHT, 0.0f));
+    // Premium border stack
+    DrawRectangleLinesEx(modal, 3.0f, BUTTON_BLUE);
+    DrawRectangleLinesEx(modal, 1.5f, Fade(BUTTON_BLUE_HOVER, glowIntensity));
 
     // Header
     DrawRectangle(modal.x, modal.y, modal.width, 50, METAL_ACCENT);
@@ -381,18 +518,25 @@ void ShowCartModal(int screenWidth, int screenHeight, std::vector<CartItem>& car
     Rectangle btnLimpar{modal.x+194, modal.y+mh-70, 140, 40};
     Rectangle btnContinuar{modal.x+modal.width-174, modal.y+mh-70, 150, 40};
 
-    if(!cart.empty() && DrawButton("Finalizar Compra", btnFinalizar, SUCCESS_GREEN)) {
-        if(!isLoggedIn) {
-            showLoginPrompt = true;
-            cartMessage = "Faca login para finalizar a compra!";
-        } else {
-            showCheckout = true;
-            showModal = false;
+    // Show button always, but disable if cart is empty
+    bool canFinalize = !cart.empty();
+    if(DrawButton("Finalizar Compra", btnFinalizar, canFinalize ? SUCCESS_GREEN : DARKGRAY)) {
+        if(canFinalize) {
+            if(!isLoggedIn) {
+                showLoginPrompt = true;
+                cartMessage = "Faca login para finalizar a compra!";
+            } else {
+                showCheckout = true;
+                showModal = false;
+            }
         }
     }
     
-    if(!cart.empty() && DrawButton("Limpar", btnLimpar, BUTTON_RED)) {
-        cart.clear();
+    // Show clear button always, but disable if cart is empty
+    if(DrawButton("Limpar", btnLimpar, !cart.empty() ? BUTTON_RED : DARKGRAY)) {
+        if(!cart.empty()) {
+            cart.clear();
+        }
     }
     
     if(DrawButton("Continuar", btnContinuar, METAL_ACCENT)) {
@@ -449,27 +593,40 @@ std::vector<Product> LoadProducts() {
     if(file.is_open()) {
         std::string line;
         while(std::getline(file, line)) {
-            Product p;
-            size_t pos = 0;
-            // Parse ID
-            size_t nextPos = line.find('|', pos);
-            p.id = std::stoi(line.substr(pos, nextPos - pos));
-            pos = nextPos + 1;
+            // Skip empty lines
+            if(line.empty()) continue;
             
-            // Parse name
-            nextPos = line.find('|', pos);
-            p.name = line.substr(pos, nextPos - pos);
-            pos = nextPos + 1;
+            try {
+                Product p;
+                size_t pos = 0;
+                
+                // Parse ID
+                size_t nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue; // Invalid line
+                std::string idStr = line.substr(pos, nextPos - pos);
+                if(idStr.empty()) continue; // Empty ID
+                p.id = std::stoi(idStr);
+                pos = nextPos + 1;
             
-            // Parse desc
-            nextPos = line.find('|', pos);
-            p.desc = line.substr(pos, nextPos - pos);
-            pos = nextPos + 1;
-            
-            // Parse price
-            nextPos = line.find('|', pos);
-            p.price = std::stof(line.substr(pos, nextPos - pos));
-            pos = nextPos + 1;
+                // Parse name
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue; // Invalid line
+                p.name = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse desc
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue; // Invalid line
+                p.desc = line.substr(pos, nextPos - pos);
+                pos = nextPos + 1;
+                
+                // Parse price
+                nextPos = line.find('|', pos);
+                if(nextPos == std::string::npos) continue; // Invalid line
+                std::string priceStr = line.substr(pos, nextPos - pos);
+                if(priceStr.empty()) continue; // Empty price
+                p.price = std::stof(priceStr);
+                pos = nextPos + 1;
             
             // Parse color
             nextPos = line.find('|', pos);
@@ -540,15 +697,19 @@ std::vector<Product> LoadProducts() {
                     p.discountPercent = 0.0f;
                     p.rating = 4.0f; // Default rating
                 }
-            } else {
-                p.imagePath = "none";
-                p.inStock = true;
-                p.isOnDiscount = false;
-                p.discountPercent = 0.0f;
-                p.rating = 4.0f; // Default rating
+                } else {
+                    p.imagePath = "none";
+                    p.inStock = true;
+                    p.isOnDiscount = false;
+                    p.discountPercent = 0.0f;
+                    p.rating = 4.0f; // Default rating
+                }
+                
+                products.push_back(p);
+            } catch(const std::exception& e) {
+                // Skip malformed lines (invalid number format, etc.)
+                continue;
             }
-            
-            products.push_back(p);
         }
         file.close();
     }
@@ -572,6 +733,11 @@ void ShowAdminPanel(int screenWidth, int screenHeight, std::vector<Product>& pro
     static const char* categoryNames[] = {"CPU", "GPU", "RAM", "Storage", "Motherboard", "PSU", "Cooling", "Case", "Peripheral"};
     
     DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.8f));
+    
+    // Consume all clicks to prevent click-through
+    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        // Click consumed - prevents any background interaction
+    }
     
     int mw = 800, mh = 650;
     Rectangle modal{(float)(screenWidth/2-mw/2), (float)(screenHeight/2-mh/2), (float)mw, (float)mh};
@@ -970,6 +1136,11 @@ void ShowAdminPanel(int screenWidth, int screenHeight, std::vector<Product>& pro
 }
 
 void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int)) {
+    // Initialize particle system
+    if(!particlesInitialized) {
+        InitParticles(screenWidth, screenHeight);
+    }
+    
     // Load high-quality font for crisp text rendering
     if(!fontLoaded) {
         // Try loading Segoe UI font (Windows), high resolution for crisp rendering
@@ -997,7 +1168,6 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     User* currentUser = nullptr;
     std::string currentUsername = "";
     bool showLoginPrompt = false;
-    bool showRegisterModal = false;
     bool showUserProfile = false;
     bool showWishlist = false;
     bool showOrderHistory = false;
@@ -1072,8 +1242,14 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     SortMode sortMode = SORT_NONE;
 
     while (!WindowShouldClose()) {
+        // Update particles
+        UpdateParticles(screenWidth, screenHeight);
+        
         BeginDrawing();
         ClearBackground(METAL_BG);
+        
+        // Draw particles as background layer
+        DrawParticles();
         
         // Update toast timer
         if(toastTimer > 0) {
@@ -1775,10 +1951,22 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             }
         }
 
+        // Ambient lighting effect - radial gradient from top center
+        Vector2 lightCenter = {(float)screenWidth / 2, -200};
+        for(int r = 0; r < 5; r++) {
+            float radius = 300 + r * 150;
+            float alpha = (0.12f - r * 0.02f);
+            DrawCircleGradient(lightCenter.x, lightCenter.y, radius, 
+                             Fade(BUTTON_BLUE, alpha), Fade(BUTTON_BLUE, 0.0f));
+        }
+        
         // Scissor mode for scrollable area
         Rectangle scrollArea = {0, 190, (float)screenWidth, viewportHeight};
         BeginScissorMode(scrollArea.x, scrollArea.y, scrollArea.width, scrollArea.height);
 
+        // Check if any blocking modal is open (excludes showProductDetails to allow switching between products)
+        bool blockingModalOpen = showCart || showLoginPrompt || showUserProfile || showWishlist || showCheckout || showOrderHistory || showAdmin;
+        
         // MODERN PRODUCT GRID with hover effects and scroll
         float productStartX = 350; // Start products after filter sidebar
         for(size_t k=0;k<pageVisible.size();++k){
@@ -1791,23 +1979,57 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             // Only render if visible in viewport
             if(y + cardH < 190 || y > 190 + viewportHeight) continue;
             
-            bool isHovered = CheckCollisionPointRec(GetMousePosition(), card);
+            // Disable hover and interaction when blocking modal is open
+            bool isHovered = !blockingModalOpen && CheckCollisionPointRec(GetMousePosition(), card);
+            
+            // Smooth scale animation on hover
+            static std::map<int, float> cardScales;
+            if(cardScales.find(i) == cardScales.end()) cardScales[i] = 1.0f;
+            float targetScale = isHovered ? 1.02f : 1.0f;
+            cardScales[i] += (targetScale - cardScales[i]) * 0.2f; // Smooth lerp
+            
+            // Apply scale transform
+            float scaleOffset = (cardW * cardScales[i] - cardW) / 2;
+            Rectangle scaledCard = {card.x - scaleOffset, card.y - scaleOffset, cardW * cardScales[i], cardH * cardScales[i]};
             
             // Click on card to view details (but not on buttons area)
-            Rectangle cardClickArea = {card.x, card.y, card.width, card.height - 50}; // Exclude bottom button area
-            if(CheckCollisionPointRec(GetMousePosition(), cardClickArea) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Rectangle cardClickArea = {scaledCard.x, scaledCard.y, scaledCard.width, scaledCard.height - 50};
+            if(!blockingModalOpen && CheckCollisionPointRec(GetMousePosition(), cardClickArea) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 selectedProductForDetails = i;
                 showProductDetails = true;
             }
             
-            // Card shadow
-            DrawRectangle(card.x + 3, card.y + 3, card.width, card.height, Fade(SHADOW_COLOR, 0.35f));
+            // Enhanced multi-layer shadow with blur effect
+            DrawRectangleRounded({scaledCard.x + 3, scaledCard.y + 8, scaledCard.width, scaledCard.height}, 0.06f, 8, Fade(SHADOW_COLOR, 0.6f));
+            DrawRectangleRounded({scaledCard.x + 2, scaledCard.y + 5, scaledCard.width, scaledCard.height}, 0.06f, 8, Fade(SHADOW_COLOR, 0.4f));
+            DrawRectangleRounded({scaledCard.x + 1, scaledCard.y + 2, scaledCard.width, scaledCard.height}, 0.06f, 8, Fade(SHADOW_COLOR, 0.2f));
             
-            // Card background with hover effect
+            // Card background with gradient
             Color cardBg = isHovered ? CARD_HOVER : METAL_PANEL;
-            DrawRectangleRounded(card, 0.05f, 8, cardBg);
+            DrawRectangleRounded(scaledCard, 0.06f, 8, cardBg);
+            
+            // Animated inner glow when hovered
+            if(isHovered) {
+                static float glowPulse = 0.0f;
+                glowPulse += 0.05f;
+                float glowIntensity = 0.08f + sin(glowPulse) * 0.03f;
+                DrawRectangleRounded(scaledCard, 0.06f, 8, Fade(BUTTON_BLUE, glowIntensity));
+                
+                // Animated border pulse
+                DrawRectangleLinesEx(scaledCard, 3.0f, Fade(BUTTON_BLUE_HOVER, 0.6f + sin(glowPulse) * 0.2f));
+            }
+            
+            // Premium border
             Color cardBorder = isHovered ? BUTTON_BLUE : METAL_ACCENT;
-            DrawRectangleLinesEx(card, 2.0f, cardBorder);
+            DrawRectangleLinesEx(scaledCard, isHovered ? 2.5f : 1.5f, cardBorder);
+            
+            // Gradient shine effect
+            Rectangle topShine = {scaledCard.x, scaledCard.y, scaledCard.width, 80};
+            DrawRectangleGradientV(topShine.x, topShine.y, topShine.width, topShine.height, 
+                                   Fade(METAL_HIGHLIGHT, 0.05f), Fade(METAL_HIGHLIGHT, 0.0f));
+            
+            // Use scaled card for remaining rendering
+            card = scaledCard;
             
             // Color indicator strip
             Rectangle colorStrip = {card.x, card.y, 5, card.height};
@@ -1826,7 +2048,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             if(isLoggedIn && currentUser != nullptr) {
                 bool isInWishlist = std::find(currentUser->wishlist.begin(), currentUser->wishlist.end(), products[i].id) != currentUser->wishlist.end();
                 Rectangle heartBtn = {x + cardW - 45, y + 75, 35, 35};
-                bool heartHover = CheckCollisionPointRec(GetMousePosition(), heartBtn);
+                bool heartHover = !blockingModalOpen && CheckCollisionPointRec(GetMousePosition(), heartBtn);
                 
                 Color heartColor = isInWishlist ? BUTTON_RED : METAL_ACCENT;
                 if(heartHover) heartColor = isInWishlist ? ColorBrightness(BUTTON_RED, 0.2f) : METAL_HIGHLIGHT;
@@ -1839,7 +2061,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                 int heartW = MeasureTextCustom(heartIcon, 24);
                 DrawTextCustom(heartIcon, heartBtn.x + (heartBtn.width - heartW) / 2, heartBtn.y + 6, 24, heartColor);
                 
-                if(heartHover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                if(!blockingModalOpen && heartHover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     if(isInWishlist) {
                         // Remove from wishlist
                         currentUser->wishlist.erase(
@@ -1865,20 +2087,27 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             // Description (shifted right) - FONTE MAIOR
             DrawTextCustom(products[i].desc.c_str(), x+115, y+50, 16, TEXT_GRAY);
             
-            // Discount badge (if on discount)
+            // Premium discount badge (if on discount)
             if(products[i].isOnDiscount && products[i].discountPercent > 0) {
-                Rectangle discountBadge = {x + 10, y + 10, 65, 28};
-                DrawRectangleRounded(discountBadge, 0.3f, 6, BUTTON_RED);
+                Rectangle discountBadge = {x + 10, y + 10, 70, 32};
+                // Shadow for badge
+                DrawRectangleRounded({discountBadge.x + 1, discountBadge.y + 2, discountBadge.width, discountBadge.height}, 0.4f, 6, Fade(SHADOW_COLOR, 0.6f));
+                // Gradient background effect
+                DrawRectangleRounded(discountBadge, 0.4f, 6, BUTTON_RED);
+                DrawRectangleRounded({discountBadge.x, discountBadge.y, discountBadge.width, discountBadge.height / 2}, 0.4f, 6, Fade(WHITE, 0.15f));
+                // Border for sharpness
+                DrawRectangleLinesEx(discountBadge, 1.5f, Fade(WHITE, 0.3f));
                 char discountBuf[16];
                 snprintf(discountBuf, sizeof(discountBuf), "-%0.f%%", products[i].discountPercent);
-                int discW = MeasureTextCustom(discountBuf, 16);
-                DrawTextWithShadow(discountBuf, discountBadge.x + (discountBadge.width - discW)/2, discountBadge.y + 6, 16, TEXT_WHITE);
+                int discW = MeasureTextCustom(discountBuf, 17);
+                DrawTextWithShadow(discountBuf, discountBadge.x + (discountBadge.width - discW)/2, discountBadge.y + 7, 17, TEXT_WHITE, 1);
             }
             
-            // Price badge (with discount calculation)
+            // Ultra-premium price badge with animated shimmer
             char priceBuf[32];
             float displayPrice = products[i].price;
-            if(products[i].isOnDiscount && products[i].discountPercent > 0) {
+            bool hasDiscount = products[i].isOnDiscount && products[i].discountPercent > 0;
+            if(hasDiscount) {
                 displayPrice = products[i].price * (1.0f - products[i].discountPercent / 100.0f);
                 snprintf(priceBuf, sizeof(priceBuf), "EUR %.2f", displayPrice);
             } else {
@@ -1886,9 +2115,29 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             }
             int priceW = MeasureTextCustom(priceBuf, 22);
             Rectangle priceBadge = {x + cardW - priceW - 30, y + 14, (float)priceW + 20, 30};
-            Color priceColor = products[i].isOnDiscount ? BUTTON_RED : GOLD;
-            DrawRectangleRounded(priceBadge, 0.3f, 6, Fade(priceColor, 0.15f));
-            DrawTextWithShadow(priceBuf, priceBadge.x + 10, priceBadge.y + 5, 22, priceColor);
+            
+            // Animated shimmer effect on price
+            static float shimmerTime = 0.0f;
+            shimmerTime += GetFrameTime() * 2.0f;
+            float shimmerX = priceBadge.x + fmod(shimmerTime * 50, priceBadge.width + 100) - 50;
+            
+            // Premium gradient background
+            DrawRectangleGradientV(priceBadge.x, priceBadge.y, priceBadge.width, priceBadge.height,
+                                   hasDiscount ? PREMIUM_GOLD : SUCCESS_GREEN,
+                                   hasDiscount ? ColorBrightness(PREMIUM_GOLD, -0.2f) : ColorBrightness(SUCCESS_GREEN, -0.2f));
+            
+            // Shimmer sweep
+            Rectangle shimmer = {shimmerX, priceBadge.y, 30, priceBadge.height};
+            DrawRectangleGradientH(shimmer.x, shimmer.y, shimmer.width, shimmer.height,
+                                   Fade(WHITE, 0.0f), Fade(WHITE, 0.4f));
+            DrawRectangleGradientH(shimmer.x + 15, shimmer.y, shimmer.width, shimmer.height,
+                                   Fade(WHITE, 0.4f), Fade(WHITE, 0.0f));
+            
+            // Outer glow
+            DrawRectangleLinesEx({priceBadge.x - 1, priceBadge.y - 1, priceBadge.width + 2, priceBadge.height + 2}, 
+                                2.0f, Fade(hasDiscount ? PREMIUM_GOLD : SUCCESS_GREEN, 0.5f));
+            // Premium text with glow
+            DrawTextWithShadow(priceBuf, priceBadge.x + 10, priceBadge.y + 5, 22, TEXT_WHITE);
             
             // Show original price if discounted
             if(products[i].isOnDiscount && products[i].discountPercent > 0) {
@@ -1921,7 +2170,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             
             if(products[i].inStock) {
                 // Minus button
-                if(DrawButton("-", btnQtyMinus, BUTTON_RED)) {
+                if(!blockingModalOpen && DrawButton("-", btnQtyMinus, BUTTON_RED)) {
                     if(selectedQty > 1) selectedQty--;
                 }
                 
@@ -1934,13 +2183,13 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
                 DrawTextCustom(qtyBuf, btnQtyDisplay.x + (btnQtyDisplay.width - qtyTextW) / 2, btnQtyDisplay.y + 7, 18, TEXT_WHITE);
                 
                 // Plus button
-                if(DrawButton("+", btnQtyPlus, SUCCESS_GREEN)) {
+                if(!blockingModalOpen && DrawButton("+", btnQtyPlus, SUCCESS_GREEN)) {
                     selectedQty++;
                 }
                 
                 // Add to cart button (uses selected quantity)
                 Rectangle btn = {x + cardW - 130, y + cardH - 40, 115, 32};
-                if(DrawButton("Carrinho", btn, BUTTON_BLUE)){
+                if(!blockingModalOpen && DrawButton("Carrinho", btn, BUTTON_BLUE)){
                     if(!isLoggedIn) showLoginPrompt=true;
                     else{
                         auto it=std::find_if(cart.begin(),cart.end(),
@@ -2110,15 +2359,42 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             }
         }
         
-        // Toast notification
+        // Ultra-premium Toast notification with bounce animation
         if(toastTimer > 0) {
             float alpha = toastTimer > 1.5f ? 1.0f : (toastTimer / 1.5f);
-            Rectangle toastBox = {(float)screenWidth/2 - 200, 100, 400, 50};
-            DrawRectangle(toastBox.x + 3, toastBox.y + 3, toastBox.width, toastBox.height, Fade(SHADOW_COLOR, 0.4f * alpha));
-            DrawRectangleRounded(toastBox, 0.2f, 8, Fade(SUCCESS_GREEN, 0.9f * alpha));
-            DrawRectangleLinesEx(toastBox, 2.0f, Fade(TEXT_WHITE, alpha));
-            int txtW = MeasureTextCustom(toastMessage.c_str(), 18);
-            DrawTextCustom(toastMessage.c_str(), toastBox.x + (toastBox.width - txtW)/2, toastBox.y + 16, 18, Fade(TEXT_WHITE, alpha));
+            // Elastic bounce animation
+            float slideIn = 0;
+            if(toastTimer > 2.5f) {
+                float t = (3.0f - toastTimer) / 0.5f; // 0 to 1
+                slideIn = (1 - pow(1 - t, 3)) * 60; // Ease-out cubic for smooth entry
+            }
+            Rectangle toastBox = {(float)screenWidth/2 - 220, 100 - slideIn, 440, 60};
+            
+            // Animated glow around toast
+            static float toastGlow = 0.0f;
+            toastGlow += 0.1f;
+            float glowSize = 4.0f + sin(toastGlow) * 2.0f;
+            DrawRectangleRounded({toastBox.x - glowSize, toastBox.y - glowSize, 
+                                 toastBox.width + glowSize*2, toastBox.height + glowSize*2}, 
+                                0.3f, 8, Fade(SUCCESS_GREEN, (0.2f + sin(toastGlow) * 0.1f) * alpha));
+            
+            // Triple-layer shadow for depth
+            DrawRectangleRounded({toastBox.x + 3, toastBox.y + 6, toastBox.width, toastBox.height}, 0.3f, 8, Fade(SHADOW_COLOR, 0.6f * alpha));
+            DrawRectangleRounded({toastBox.x + 2, toastBox.y + 4, toastBox.width, toastBox.height}, 0.3f, 8, Fade(SHADOW_COLOR, 0.4f * alpha));
+            
+            // Main toast background with gradient
+            DrawRectangleRounded(toastBox, 0.3f, 8, Fade(SUCCESS_GREEN, 0.95f * alpha));
+            Rectangle topShine = {toastBox.x, toastBox.y, toastBox.width, toastBox.height / 2};
+            DrawRectangleRounded(topShine, 0.3f, 8, Fade(WHITE, 0.15f * alpha));
+            
+            // Glowing border
+            DrawRectangleLinesEx(toastBox, 2.5f, Fade(SUCCESS_GREEN_HOVER, alpha));
+            
+            // Icon (checkmark)
+            DrawTextCustom("v", toastBox.x + 20, toastBox.y + 16, 24, Fade(TEXT_WHITE, alpha));
+            
+            // Message text (centered with icon offset)
+            DrawTextWithShadow(toastMessage.c_str(), toastBox.x + 60, toastBox.y + 19, 19, Fade(TEXT_WHITE, alpha), 1);
         }
 
         if(showLoginPrompt){
@@ -2441,6 +2717,11 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             // Dark overlay
             DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.75f));
             
+            // Consume all clicks to prevent click-through
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                // Click consumed - prevents any background interaction
+            }
+            
             // Modal window
             float modalWidth = 900;
             float modalHeight = 650;
@@ -2565,9 +2846,14 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         }
         
         // CHECKOUT MODAL
-        if(showCheckout && isLoggedIn && currentUser != nullptr && !cart.empty()) {
+        if(showCheckout) {
             // Dark overlay
             DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.75f));
+            
+            // Consume all clicks to prevent click-through
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                // Click consumed - prevents any background interaction
+            }
             
             static std::string shippingName = "";
             static std::string shippingAddress = "";
@@ -2830,6 +3116,11 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
             // Dark overlay
             DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.75f));
             
+            // Consume all clicks to prevent click-through
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                // Click consumed - prevents any background interaction
+            }
+            
             // Modal window
             float modalWidth = 950;
             float modalHeight = 700;
@@ -2965,6 +3256,11 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         if(showProductDetails && selectedProductForDetails >= 0 && selectedProductForDetails < (int)products.size()){
             // Dark overlay
             DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.7f));
+            
+            // Consume all clicks to prevent click-through
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                // Click consumed - prevents any background interaction
+            }
             
             // Modal window
             Rectangle modal = {(float)screenWidth/2 - 400, (float)screenHeight/2 - 300, 800, 600};
