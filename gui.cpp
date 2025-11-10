@@ -182,8 +182,8 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
     static Texture2D logoImage = {0};
     static bool logoLoaded = false;
     if(!logoLoaded) {
-        if(FileExists("thumbnails/imagem.png")) {
-            Image img = LoadImage("thumbnails/imagem.png");
+        if(FileExists("thumbnails/logo.jpg")) {
+            Image img = LoadImage("thumbnails/logo.jpg");
             ImageResize(&img, 120, 64);
             logoImage = LoadTextureFromImage(img);
             UnloadImage(img);
@@ -209,9 +209,7 @@ void DrawHeader(int screenW, int cartCount, bool highlightCartBtn, bool highligh
         DrawTextCustom("TC", logoBox.x + 14, logoBox.y + 14, 24, TEXT_WHITE);
     }
     
-    // Title with modern typography
-    DrawTextCustom("TechCore", 150, 20, 32, METAL_HIGHLIGHT);
-    DrawTextCustom("Componentes Premium", 150, 50, 14, METAL_BRONZE);
+    // Title removed (logo-only header)
 
     // Admin button (only if logged in)
     if(isLoggedIn) {
