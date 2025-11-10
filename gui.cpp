@@ -248,6 +248,45 @@ Texture2D GetProductImage(const std::string& imagePath) {
     return placeholderImage;
 }
 
+// Cursor trail system for premium feel
+struct CursorTrail {
+    Vector2 position;
+    float alpha;
+    float size;
+};
+
+static std::vector<CursorTrail> cursorTrails;
+static const int MAX_TRAILS = 15;
+
+void UpdateCursorTrails() {
+    Vector2 mousePos = GetMousePosition();
+    
+    // Add new trail point
+    if(cursorTrails.size() >= MAX_TRAILS) {
+        cursorTrails.erase(cursorTrails.begin());
+    }
+    CursorTrail newTrail;
+    newTrail.position = mousePos;
+    newTrail.alpha = 0.6f;
+    newTrail.size = 8.0f;
+    cursorTrails.push_back(newTrail);
+    
+    // Update existing trails
+    for(auto& trail : cursorTrails) {
+        trail.alpha *= 0.85f;
+        trail.size *= 0.95f;
+    }
+}
+
+void DrawCursorTrails() {
+    for(const auto& trail : cursorTrails) {
+        if(trail.alpha > 0.05f) {
+            DrawCircleV(trail.position, trail.size, Fade(BUTTON_BLUE, trail.alpha * 0.3f));
+            DrawCircleV(trail.position, trail.size * 0.5f, Fade(BUTTON_BLUE_HOVER, trail.alpha * 0.5f));
+        }
+    }
+}
+
 namespace techcore {
 
 // Helper function to convert category to string
@@ -1240,13 +1279,33 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
     // Sorting
     enum SortMode { SORT_NONE, SORT_PRICE_ASC, SORT_PRICE_DESC, SORT_NAME };
     SortMode sortMode = SORT_NONE;
+    
+    // Animated background waves
+    float waveTime = 0.0f;
 
     while (!WindowShouldClose()) {
         // Update particles
         UpdateParticles(screenWidth, screenHeight);
         
+        // Update cursor trails
+        UpdateCursorTrails();
+        
+        // Update wave animation
+        waveTime += GetFrameTime() * 0.3f;
+        
         BeginDrawing();
         ClearBackground(METAL_BG);
+        
+        // Draw animated background waves for depth
+        for(int w = 0; w < 3; w++) {
+            for(int x = 0; x < screenWidth + 100; x += 100) {
+                float waveY = screenHeight * 0.7f + sin(waveTime + x * 0.01f + w * 2.0f) * 30.0f;
+                float waveHeight = screenHeight - waveY;
+                DrawRectangleGradientV(x, waveY, 100, waveHeight,
+                                      Fade(BUTTON_BLUE, 0.02f - w * 0.005f),
+                                      Fade(BUTTON_BLUE, 0.0f));
+            }
+        }
         
         // Draw particles as background layer
         DrawParticles();
@@ -3565,6 +3624,9 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         if(showAdmin){
             ShowAdminPanel(screenWidth, screenHeight, products, showAdmin);
         }
+        
+        // Draw cursor trails as final layer for maximum visibility
+        DrawCursorTrails();
 
         EndDrawing();
     }
