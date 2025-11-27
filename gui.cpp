@@ -1081,7 +1081,7 @@ void RunTechcoreUI(int screenWidth, int screenHeight, bool (*LoginFunc)(int, int
         Rectangle btnSortName = {1700, 110, 90, 40};
         Rectangle btnSortReset = {1800, 110, 90, 40};
         
-        if(DrawButton("$ Preco", btnSortPrice, sortMode == SORT_PRICE_ASC || sortMode == SORT_PRICE_DESC ? SUCCESS_GREEN : METAL_ACCENT)) {
+        if(DrawButton("€ Preço", btnSortPrice, sortMode == SORT_PRICE_ASC || sortMode == SORT_PRICE_DESC ? SUCCESS_GREEN : METAL_ACCENT)) {
             sortMode = (sortMode == SORT_PRICE_ASC) ? SORT_PRICE_DESC : SORT_PRICE_ASC;
         }
         if(DrawButton("A-Z Nome", btnSortName, sortMode == SORT_NAME ? SUCCESS_GREEN : METAL_ACCENT)) {
